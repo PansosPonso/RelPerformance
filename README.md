@@ -19,8 +19,8 @@ python Evaluate.py --M6 1 --YAHOO 0 --ENSEMBLE 0 --TOP_N_MODELS 4 --MODEL_NAMES 
 
 Optional Arguments
 
-+**M6**: If set to 1, evaluates models using the M6 data and evaluation period.
-+**YAHOO**: If set to 1, obtains data from Yahoo Finance.
+-**M6**: If set to 1, evaluates models using the M6 data and evaluation period.
+-**YAHOO**: If set to 1, obtains data from Yahoo Finance.
 **ENSEMBLE**: If set to 1, creates the ensemble model.
 **TOP_N_MODELS**: Specifies the number of models the ensemble model will consist of.
 **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
