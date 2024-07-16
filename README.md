@@ -25,7 +25,7 @@ Optional Arguments
 - **TOP_N_MODELS**: Specifies the number of models the ensemble model will consist of.
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
   
-<u>Available Models<\u>
+***Available Models***
 
 - **RF**: Random Forest
 [Random Forests by Breiman (2001)] (https://link.springer.com/article/10.1023/A:1010933404324)
