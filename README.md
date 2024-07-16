@@ -6,16 +6,16 @@ This repository contains the code for the paper titled "Predicting the Relative 
 ## Installation
 First, install all dependencies using:
 
-```python
+```
 pip install -r requirements.txt
-```python
+```
 
 Usage
 To run the code, use the following command:
 
-```python
+```
 python Evaluate.py --M6 1 --YAHOO 0 --ENSEMBLE 0 --TOP_N_MODELS 4 --MODEL_NAMES VAE GAN
-```python
+```
 
 Optional Arguments
 **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
