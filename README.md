@@ -28,7 +28,7 @@ python Evaluate.py --M6 1 --YAHOO 0 --ENSEMBLE 0 --TOP_N_MODELS 4 --MODEL_NAMES 
 ***Available Models***
 
 - **RF**: Random Forest
-[Random Forests by Breiman (2001)] (https://link.springer.com/article/10.1023/A:1010933404324)
+[Random Forests by Breiman (2001)](https://link.springer.com/article/10.1023/A:1010933404324)
 - **SR**: Softmax (or multinomial logistic) Regression
 - **SVM**: Support Vector Machine
 [Support-Vector Networks by Cortes and Vapnik (1995)](https://link.springer.com/article/10.1007/BF00994018)
