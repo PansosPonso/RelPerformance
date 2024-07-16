@@ -36,8 +36,8 @@ from hyperopt import hp, tpe, Trials
 from hyperopt.fmin import fmin
 
 from all_models import copula_model, kde_model, gaussian_mixture_model, deepar_model
-from all_models import patchtst_model, flows_model, garch_mnd_model, vae_model, llama_model
-from all_models import average_model, ewma_model, mnd_model, gan_model, bvar_model
+from all_models import patchtst_model, flows_model, vae_model, llama_model
+from all_models import mnd_model, garch_mnd_model, gan_model, bvar_model
 from all_models import rforest_model, logistic_model, svm_model, naive_bayes_model, mlp_model, lgbm_model
 
 RANDOM_SEED = 42
@@ -1005,22 +1005,6 @@ if __name__ == '__main__':
                                     'dropout': hp.uniform('dropout', 0.05, 0.8),
                                     'lr': hp.loguniform('lr', np.log(1e-4), np.log(1e-1)),
                                     'max_epochs': scope.int(hp.quniform('max_epochs', 10, 100, 10)),
-                                    },
-            'type': 'Mreturns',
-            'optimize_params':args.TUNING
-        }
-        ,
-        'Average' : {
-            'name': 'Historical average',
-            'model': average_model(),
-            'type': 'Mreturns'
-        }
-        ,
-        'EWMA' : {
-            'name': 'EWMA',
-            'model': ewma_model(params={'days':60}),
-            'hyperparameter_space': {
-                                    'days': scope.int(hp.quniform('days', 20, 120, 10)),
                                     },
             'type': 'Mreturns',
             'optimize_params':args.TUNING
