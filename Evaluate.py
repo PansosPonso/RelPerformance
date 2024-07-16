@@ -748,17 +748,17 @@ if __name__ == '__main__':
         end_oos_date = '2023-02-03'
         start_valid_date = '2021-03-05'
         end_valid_date = '2022-02-04'
-        data_file = 'Data_M6.xlsx'
-        data_universe = 'Universe_M6.xlsx'
-        results_file = 'Results_m6.xlsx'
+        data_file = r'data/Data_M6.xlsx'
+        data_universe = r'data/Universe_M6.xlsx'
+        results_file = r'results/Results_m6.xlsx'
     else:
         start_oos_date = '2014-10-17'
         end_oos_date = '2023-12-29'
         start_valid_date = '2011-12-16'
         end_valid_date = '2014-09-19'
-        data_file = 'Data_v2.xlsx'
-        data_universe = 'Universe_v2.xlsx'
-        results_file = 'Results_v2.xlsx'
+        data_file = r'data/Data_v2.xlsx'
+        data_universe = r'data/Universe_v2.xlsx'
+        results_file = r'results/Results_v2.xlsx'
 
     start_oos_date = datetime.datetime.strptime(start_oos_date, '%Y-%m-%d')
     end_oos_date = datetime.datetime.strptime(end_oos_date, '%Y-%m-%d')
