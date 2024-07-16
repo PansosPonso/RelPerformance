@@ -10,14 +10,14 @@ First, install all dependencies using:
 pip install -r requirements.txt
 ```
 
-Usage
+## Usage
 To run the code, use the following command:
 
 ```
 python Evaluate.py --M6 1 --YAHOO 0 --ENSEMBLE 0 --TOP_N_MODELS 4 --MODEL_NAMES VAE GAN
 ```
 
-Optional Arguments
+***Optional Arguments***
 
 - **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
 - **YAHOO**: If set to 1, obtains data from Yahoo Finance.
