@@ -14,16 +14,17 @@ pip install -r requirements.txt
 To run the code, use the following command:
 
 ```
-python Evaluate.py --M6 1 --YAHOO 0 --ENSEMBLE 0 --TOP_N_MODELS 4 --MODEL_NAMES VAE GAN
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 0 --data_from_previous_run Results_v2.xlsx
 ```
 
 ***Optional Arguments***
 
 - **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
-- **YAHOO**: If set to 1, obtains data from Yahoo Finance.
-- **ENSEMBLE**: If set to 1, creates the ensemble model.
-- **TOP_N_MODELS**: Specifies the number of models the ensemble model will consist of.
+- **YAHOO**: If set to 1, data are obtained from Yahoo Finance.
+- **KEEP_TUNING_FORECASTS**: Specifies whether to keep the forecasts that were generated for the tuning sample.
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
+- **data_from_previous_run**: In case the code was interrupted, this parameter allows specifying an Excel file containing the forecasts generated up to the point of interruption.
+- **TUNING**: Indicates whether the models' hyperparameters should be tuned.
   
 ***Available Models***
 
