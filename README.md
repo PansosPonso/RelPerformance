@@ -11,10 +11,16 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-To run the code, use the following command:
+To run the models and generate the forecasts, use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 0 --data_from_previous_run Results_v2.xlsx
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --data_from_previous_run Results_M6.xlsx
+```
+
+To calculate all evaluation metrics, use the following command:
+
+```
+python Generate_forecasts.py 
 ```
 
 ***Optional Arguments***
@@ -47,7 +53,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 - **DeepAR**: [DeepAR: Probabilistic forecasting with autoregressive recurrent networks by Salinas et al. (2023)](https://arxiv.org/abs/1704.04110)
 - **PatchTST**: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers by Nie et al. (2023)](https://arxiv.org/abs/2211.14730)
 
-**Note that for the following models—DeepAR, PatchTST, GC, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
+**Note that for the following models—DeepAR, PatchTST, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
 
 ## Contributing
 We welcome contributions to improve the project. Please feel free to fork this repository and submit pull requests.
