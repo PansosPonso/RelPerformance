@@ -47,6 +47,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 - **DeepAR**: [DeepAR: Probabilistic forecasting with autoregressive recurrent networks by Salinas et al. (2023)](https://arxiv.org/abs/1704.04110)
 - **PatchTST**: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers by Nie et al. (2023)](https://arxiv.org/abs/2211.14730)
 
+**Note that for the following models—DeepAR, PatchTST, GC, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
 
 ## Contributing
 We welcome contributions to improve the project. Please feel free to fork this repository and submit pull requests.
