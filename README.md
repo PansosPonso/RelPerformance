@@ -14,16 +14,10 @@ pip install -r requirements.txt
 To run the models and generate the forecasts, use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --data_from_previous_run Results_M6.xlsx
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --data_from_previous_run Results_m6.xlsx
 ```
 
-To calculate all evaluation metrics, use the following command:
-
-```
-python Generate_forecasts.py 
-```
-
-***Optional Arguments***
+***Arguments***
 
 - **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
 - **YAHOO**: If set to 1, data are obtained from Yahoo Finance.
@@ -54,6 +48,31 @@ python Generate_forecasts.py
 - **PatchTST**: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers by Nie et al. (2023)](https://arxiv.org/abs/2211.14730)
 
 **Note that for the following models—DeepAR, PatchTST, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
+
+
+To calculate all evaluation metrics, use the following command:
+
+```
+python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
+```
+
+***Arguments***
+
+- **tuning_sample**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
+- **file_name**: Specifies the file that contains the forecasts.
+
+To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
+
+```
+python Calculate_tables.py  --file_name Results_m6.xlsx --tuning_sample 12 --M6 1
+```
+
+***Arguments***
+
+- **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
+- **tuning_sample**: The number of observations in the tuning sample.
+- **freq**: The frequency (in months) that the ensemble models are reevaluated.
+- **file_name**: Specifies the file that contains the forecasts and the metrics.
 
 ## Contributing
 We welcome contributions to improve the project. Please feel free to fork this repository and submit pull requests.
