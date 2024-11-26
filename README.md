@@ -38,15 +38,20 @@ python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
 To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
 
 ```
-python Calculate_tables.py  --file_name Results_m6.xlsx --tuning_sample 12 --M6 1
+python Calculate_tables.py --replicate_paper 1
+```
+OR, more generally,
+```
+python Calculate_tables.py --file_name 'Results_m6.xlsx' --data_file 'Data_M6.xlsx' --tuning_sample 12 --freq 6
 ```
 
 ***Arguments***
 
-- **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
+- **replicate_paper**: If set to 1, calculates Tables and Figures of the paper.
 - **tuning_sample**: The number of observations in the tuning sample.
 - **freq**: The frequency (in months) that the ensemble models are reevaluated.
 - **file_name**: Specifies the file that contains the forecasts and the metrics.
+- **data_file**: Specifies the file that contains the price data.
 
 *This code takes <1 min for the M6 sample and <1 min for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.*
 
