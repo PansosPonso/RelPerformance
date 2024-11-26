@@ -1,7 +1,15 @@
 # Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches 
 
+Panagiotis Samartzis
+
 ## Introduction
 This repository contains the code for the paper titled "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches." The project includes various models to evaluate financial assets' relative performance using different datasets and methodologies.
+
+## Contents
+The main contents of the repository are the following:
+- \Data folder:
+- \Output folder:
+
 
 ## Installation
 First, install all dependencies using:
@@ -10,7 +18,39 @@ First, install all dependencies using:
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage to replicate the results of the paper
+The following code generates the 9 tables and 2 figures for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
+
+To calculate all evaluation metrics, use the following command:
+
+```
+python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
+```
+
+***Arguments***
+
+- **tuning_sample**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
+- **file_name**: Specifies the file that contains the forecasts.
+
+This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
+
+
+To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
+
+```
+python Calculate_tables.py  --file_name Results_m6.xlsx --tuning_sample 12 --M6 1
+```
+
+***Arguments***
+
+- **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
+- **tuning_sample**: The number of observations in the tuning sample.
+- **freq**: The frequency (in months) that the ensemble models are reevaluated.
+- **file_name**: Specifies the file that contains the forecasts and the metrics.
+
+This code takes <1 min for the M6 sample and <1 min for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
+
+## Usage to run on new data
 To run the models and generate the forecasts, use the following command:
 
 ```
@@ -49,6 +89,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 
 **Note that for the following models—DeepAR, PatchTST, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
 
+This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 To calculate all evaluation metrics, use the following command:
 
@@ -73,6 +114,7 @@ python Calculate_tables.py  --file_name Results_m6.xlsx --tuning_sample 12 --M6 
 - **tuning_sample**: The number of observations in the tuning sample.
 - **freq**: The frequency (in months) that the ensemble models are reevaluated.
 - **file_name**: Specifies the file that contains the forecasts and the metrics.
+
 
 ## Contributing
 We welcome contributions to improve the project. Please feel free to fork this repository and submit pull requests.
