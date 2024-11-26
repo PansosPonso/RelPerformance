@@ -24,13 +24,13 @@ The following code generates the 9 tables and 2 figures for the paper "Predictin
 To calculate all evaluation metrics, use the following command:
 
 ```
-python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
+python Calculate_metrics.py --FILE_NAME Results_m6.xlsx --TUNING_SAMPLE 12
 ```
 
 ***Arguments***
 
-- **tuning_sample**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
-- **file_name**: Specifies the file that contains the forecasts.
+- **TUNING_SAMPLE**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
+- **FILE_NAME**: Specifies the file that contains the forecasts.
 
 > [!NOTE]
 > This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
@@ -39,20 +39,20 @@ python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
 To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
 
 ```
-python Calculate_tables.py --replicate_paper 1
+python Calculate_tables.py --REPLICATE_PAPER 1
 ```
 OR, more generally,
 ```
-python Calculate_tables.py --file_name 'Results_m6.xlsx' --data_file 'Data_M6.xlsx' --tuning_sample 12 --freq 6
+python Calculate_tables.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
 ```
 
 ***Arguments***
 
-- **replicate_paper**: If set to 1, calculates Tables and Figures of the paper.
-- **tuning_sample**: The number of observations in the tuning sample.
-- **freq**: The frequency (in months) that the ensemble models are reevaluated.
-- **file_name**: Specifies the file that contains the forecasts and the metrics.
-- **data_file**: Specifies the file that contains the price data.
+- **REPLICATE_PAPER**: If set to 1, calculates Tables and Figures of the paper.
+- **TUNING_SAMPLE**: The number of observations in the tuning sample.
+- **FREQ**: The frequency (in months) that the ensemble models are reevaluated.
+- **FILE_NAME**: Specifies the file that contains the forecasts and the metrics.
+- **DATA_FILE**: Specifies the file that contains the price data.
 
 > [!NOTE]
 > This code takes <1 min for the M6 sample and <1 min for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
@@ -61,7 +61,7 @@ python Calculate_tables.py --file_name 'Results_m6.xlsx' --data_file 'Data_M6.xl
 To run the models and generate the forecasts, use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --data_from_previous_run Results_m6.xlsx
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --DATA_FROM_PREVIOUS_RUN Results_m6.xlsx
 ```
 
 ***Arguments***
@@ -70,7 +70,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 - **YAHOO**: If set to 1, data are obtained from Yahoo Finance.
 - **KEEP_TUNING_FORECASTS**: Specifies whether to keep the forecasts that were generated for the tuning sample.
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
-- **data_from_previous_run**: In case the code was interrupted, this parameter allows specifying an Excel file containing the forecasts generated up to the point of interruption.
+- **DATA_FROM_PREVIOUS_RUN**: In case the code was interrupted, this parameter allows specifying an Excel file containing the forecasts generated up to the point of interruption.
 - **TUNING**: Indicates whether the models' hyperparameters should be tuned.
   
 ***Available Models***
