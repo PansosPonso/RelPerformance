@@ -7,9 +7,9 @@ This repository contains the code for the paper titled "Predicting the Relative 
 
 ## Contents
 The main contents of the repository are the following:
-- data/ folder: This folder contains the raw data (Price data, Categorizations, Data from Kenneth Data Library)
-- output/ folder: This folder contains the excel file with the calculated idiosyncratic volatilities per asset
-- results/ folder: This folder contains the resulted forecasts and metrics
+- data/ folder: This folder contains the raw input data (price data, categorizations, data from Kenneth Data Library and the asset universes)
+- output/ folder: This folder contains the excel file with the calculated idiosyncratic volatility per asset (the output of Calculate_id_vol.py)
+- results/ folder: This folder contains the generated forecasts and metrics, along with HTML files for all tables and JPG files for all figures (the outputs of Calculate_tables.py, Calculate_metrics.py and Generate_forecasts.py)
 
 
 ## Installation
