@@ -72,7 +72,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 
 ***Arguments***
 
-- **YAHOO**: If set to 1, data are obtained from Yahoo Finance.
+- **M6**: If set to 1, forecasts will be generated for the M6 sample.
 - **KEEP_TUNING_FORECASTS**: Specifies whether to keep the forecasts that were generated for the tuning sample.
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
 - **DATA_FROM_PREVIOUS_RUN**: In case the code was interrupted, this parameter allows specifying an Excel file containing the forecasts generated up to the point of interruption.
