@@ -5,7 +5,6 @@ import scipy
 import heapq
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import KNNImputer
-import yfinance as yf
 from tensorflow.keras.utils import to_categorical
 from collections import Counter
 import argparse
@@ -171,49 +170,34 @@ def RPS_calculation(hist_data, submission, asset_no=100):
 
     return(output)
 
-def prepare_data(YAHOO, data_universe, data_file):
+def prepare_data(data_universe, data_file):
     # Read asset prices data (as provided by the M6 submission platform)
     asset_data = pd.read_excel(data_universe)
 
-    if YAHOO:
-        # Download data from Yahoo
-        assets = asset_data['symbol'].values.tolist()
+    mappings = pd.read_excel(data_file,sheet_name='Tickers')
+    mappings = mappings[['Ticker Factset', 'Ticker']].set_index('Ticker Factset').to_dict()['Ticker']
+    mappings['Unnamed: 0'] = 'Date'
 
-        # Download historical data (select starting date)
-        data = yf.download(assets, period="max")
-        data = data[data.index <= end_oos_date]
-        closing_prices_df = data['Adj Close']
-        volume_df = data['Volume']
-        high_df = data['High']
-        low_df = data['Low']
-        open_p_df = data['Open']
-
-    else:
-
-        mappings = pd.read_excel(data_file,sheet_name='Tickers')
-        mappings = mappings[['Ticker Factset', 'Ticker']].set_index('Ticker Factset').to_dict()['Ticker']
-        mappings['Unnamed: 0'] = 'Date'
-
-        closing_prices_df = pd.read_excel(data_file,sheet_name='Close')
-        closing_prices_df = closing_prices_df.rename(columns=mappings).set_index('Date')
-        closing_prices_df.index = pd.to_datetime(closing_prices_df.index, format='%d/%m/%Y')
-        closing_prices_df = closing_prices_df[closing_prices_df.index <= end_oos_date]
-        volume_df = pd.read_excel(data_file,sheet_name='Volume')
-        volume_df = volume_df.rename(columns=mappings).set_index('Date')
-        volume_df.index = pd.to_datetime(volume_df.index, format='%d/%m/%Y')
-        volume_df = volume_df[volume_df.index <= end_oos_date]
-        open_p_df = pd.read_excel(data_file,sheet_name='Open')
-        open_p_df = open_p_df.rename(columns=mappings).set_index('Date')
-        open_p_df.index = pd.to_datetime(open_p_df.index, format='%d/%m/%Y')
-        open_p_df = open_p_df[open_p_df.index <= end_oos_date]
-        low_df = pd.read_excel(data_file,sheet_name='Low')
-        low_df = low_df.rename(columns=mappings).set_index('Date')
-        low_df.index = pd.to_datetime(low_df.index, format='%d/%m/%Y')
-        low_df = low_df[low_df.index <= end_oos_date]
-        high_df = pd.read_excel(data_file,sheet_name='High')
-        high_df = high_df.rename(columns=mappings).set_index('Date')
-        high_df.index = pd.to_datetime(high_df.index, format='%d/%m/%Y')
-        high_df = high_df[high_df.index <= end_oos_date]
+    closing_prices_df = pd.read_excel(data_file,sheet_name='Close')
+    closing_prices_df = closing_prices_df.rename(columns=mappings).set_index('Date')
+    closing_prices_df.index = pd.to_datetime(closing_prices_df.index, format='%d/%m/%Y')
+    closing_prices_df = closing_prices_df[closing_prices_df.index <= end_oos_date]
+    volume_df = pd.read_excel(data_file,sheet_name='Volume')
+    volume_df = volume_df.rename(columns=mappings).set_index('Date')
+    volume_df.index = pd.to_datetime(volume_df.index, format='%d/%m/%Y')
+    volume_df = volume_df[volume_df.index <= end_oos_date]
+    open_p_df = pd.read_excel(data_file,sheet_name='Open')
+    open_p_df = open_p_df.rename(columns=mappings).set_index('Date')
+    open_p_df.index = pd.to_datetime(open_p_df.index, format='%d/%m/%Y')
+    open_p_df = open_p_df[open_p_df.index <= end_oos_date]
+    low_df = pd.read_excel(data_file,sheet_name='Low')
+    low_df = low_df.rename(columns=mappings).set_index('Date')
+    low_df.index = pd.to_datetime(low_df.index, format='%d/%m/%Y')
+    low_df = low_df[low_df.index <= end_oos_date]
+    high_df = pd.read_excel(data_file,sheet_name='High')
+    high_df = high_df.rename(columns=mappings).set_index('Date')
+    high_df.index = pd.to_datetime(high_df.index, format='%d/%m/%Y')
+    high_df = high_df[high_df.index <= end_oos_date]
 
 
     if 'BF-B' in asset_data['symbol'].values:
@@ -420,7 +404,7 @@ def prepare_data(YAHOO, data_universe, data_file):
 ###################################### Evaluate models #######################################
 ##############################################################################################
 
-class Evaluator:
+class Generate_forecasts:
 
     def __init__(self, results_file, data_from_previous_run, dates_valid, dates_backtest, monthly_returns, returns_df, cleaned_closing_prices, closing_prices_df, train, test):
 
@@ -721,15 +705,14 @@ class Evaluator:
 
 if __name__ == '__main__':
 
-    # To run: python M6_main_light.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 0 --data_from_previous_run Results_v2.xlsx
+    # To run: python M6_main_light.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 0 --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
 
-    parser = argparse.ArgumentParser(description='Evaluate the models')
+    parser = argparse.ArgumentParser(description='Generate forecasts')
     parser.add_argument('--MODEL_NAMES', nargs='+', type=str, help="Add the models you want to run")
-    parser.add_argument('--YAHOO', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--M6', nargs='?', type=int, const=1, default=1)
     parser.add_argument('--KEEP_TUNING_FORECASTS', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--TUNING', nargs='?', type=int, const=0, default=0)
-    parser.add_argument('--data_from_previous_run', nargs='?', type=str, const=None, default=None)
+    parser.add_argument('--DATA_FROM_PREVIOUS_RUN', nargs='?', type=str, const=None, default=None)
     args = parser.parse_args()
 
     print(f'\n\nSelected models: {args.MODEL_NAMES}')
@@ -739,22 +722,22 @@ if __name__ == '__main__':
         end_oos_date = '2023-02-03'
         start_valid_date = '2021-03-05'
         end_valid_date = '2022-02-04'
-        data_file = 'Data_M6.xlsx'
-        data_universe = 'Universe_M6.xlsx'
-        results_file = 'Results_m6.xlsx'
+        data_file = '/data/Data_M6.xlsx'
+        data_universe = '/data/Universe_M6.xlsx'
+        results_file = '/results/Results_m6.xlsx'
     else:
         start_oos_date = '2014-10-17'
         end_oos_date = '2023-12-29'
         start_valid_date = '2011-12-16'
         end_valid_date = '2014-09-19'
-        data_file = 'Data_v2.xlsx'
-        data_universe = 'Universe_v2.xlsx'
-        results_file = 'Results_v2.xlsx'
+        data_file = '/data/Data_v2.xlsx'
+        data_universe = '/data/Universe_v2.xlsx'
+        results_file = '/results/Results_v2.xlsx'
 
     start_oos_date = datetime.datetime.strptime(start_oos_date, '%Y-%m-%d')
     end_oos_date = datetime.datetime.strptime(end_oos_date, '%Y-%m-%d')
 
-    monthly_returns, returns_df, cleaned_closing_prices, closing_prices_df, train, test, feats_to_use, tickers = prepare_data(args.YAHOO, data_universe, data_file)
+    monthly_returns, returns_df, cleaned_closing_prices, closing_prices_df, train, test, feats_to_use, tickers = prepare_data(data_universe, data_file)
 
     models = {
         'RF' : {
@@ -1060,7 +1043,7 @@ if __name__ == '__main__':
     dates_valid = pd.date_range(start=start_valid_date, end=end_valid_date, freq='4W-MON')
     dates_backtest = pd.date_range(start=start_oos_date, end=end_oos_date, freq='4W-MON')
 
-    eval = Evaluator(results_file, args.data_from_previous_run, dates_valid, dates_backtest, monthly_returns, returns_df, cleaned_closing_prices, closing_prices_df, train, test)
+    eval = Generate_forecasts(results_file, args.DATA_FROM_PREVIOUS_RUN, dates_valid, dates_backtest, monthly_returns, returns_df, cleaned_closing_prices, closing_prices_df, train, test)
 
     models_configs = []
     for model_name in args.MODEL_NAMES:
