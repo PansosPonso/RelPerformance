@@ -439,11 +439,11 @@ def plot_Diebold_Mariano_pvalues(forecasts, universe):
     ax.text(18.5, 16.5, 'Number of models outperformed by the corresponding model on the Y-axis', rotation=270, ha='center', va='bottom', color='black', fontweight='bold', fontsize=9)
 
     if universe == 'M6+':
-        title = 'Figure 2 (M6+).jpg'
+        title = 'results/Figure 2 (M6+).jpg'
     elif universe == 'M6':
-        title = 'Figure 2 (M6).jpg'
+        title = 'results/Figure 2 (M6).jpg'
     else:
-        title = 'Figure 2.jpg'
+        title = 'results/Figure 2.jpg'
 
     plt.savefig(title)
 
@@ -548,11 +548,11 @@ def calculate_tables(universe, file_name, back, freq):
 
     m_names = rps.columns.tolist()
 
-    print('\n\n--------------Table 2 or 3--------------------')
+    #--------------Table 2 or 3--------------------
     if universe == 'M6':
-        title = 'Table 2'
+        title = 'results/Table 2'
     else:
-        title = 'Table 3'
+        title = 'results/Table 3'
 
     # Caclulate average RPS, pAUC, ECE and ACC scores and W_RPS, together with their statistical significance
     temp_rps = pd.concat([rps.iloc[back:].mean(), rps.iloc[back:].mean().rank()], axis=1)
@@ -569,17 +569,17 @@ def calculate_tables(universe, file_name, back, freq):
 
 
 
-    print('\n--------------Table 9---------------------')
+    #--------------Table 9---------------------
     dm_pvals = np.zeros(len(m_names))
     for i,c in enumerate(m_names):
         dm_pvals[i] = Diebold_Mariano_pvalue(information_cal[c+'_RPS'].iloc[back:], information[c+'_RPS'].iloc[back:])
 
     if universe == 'M6+':
-        title = 'Table 9 (Panel B).html'
+        title = 'results/Table 9 (Panel B).html'
     elif universe == 'M6':
-        title = 'Table 9 (Panel A).html'
+        title = 'results/Table 9 (Panel A).html'
     else:
-        title = 'Table 9.html'
+        title = 'results/Table 9.html'
 
     pd.DataFrame(data = np.stack([round(rps.iloc[back:].mean(),4),round(rps_cal.iloc[back:].mean(),4), dm_pvals]).T, index = m_names, columns = ['Raw output','Calibrated output','p-value']).to_html(title)
 
@@ -592,7 +592,7 @@ def calculate_tables(universe, file_name, back, freq):
         m_names_ex_ewma = rps.columns.tolist()
 
 
-    print('\n\n--------------Table 8--------------------')
+    #--------------Table 8--------------------
     rps_by_sector = pd.DataFrame(
                 index=m_names_ex_ewma,
                 columns=asset_cats['Sector'].unique(),
@@ -621,11 +621,11 @@ def calculate_tables(universe, file_name, back, freq):
         rps_by_vol.loc[:, c] = rps_assets.loc[rps_assets.index.isin(vol[c]), :].mean()
 
     if universe == 'M6+':
-        title = 'Table 8 (M6+).html'
+        title = 'results/Table 8 (M6+).html'
     elif universe == 'M6':
-        title = 'Table 8 (M6).html'
+        title = 'results/Table 8 (M6).html'
     else:
-        title = 'Table 8.html'
+        title = 'results/Table 8.html'
 
     with open(title, 'w') as _file:
         _file.write('RPS by ETF asset class\n' + pd.DataFrame(rps_by_sector.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Asset type\n" + pd.DataFrame(rps_by_type.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Idiosyncratic vol\n" + pd.DataFrame(rps_by_vol.mean().round(4),columns=['RPS']).to_html())
@@ -673,33 +673,33 @@ def calculate_tables(universe, file_name, back, freq):
         for i in range(1,18):
             b.loc[:,i] = a[a==i].count(axis=1) / 10
 
-        b.loc[m_names_ex_ewma].to_html('Table 5.html')
+        b.loc[m_names_ex_ewma].to_html('results/Table 5.html')
 
-    print('\n\n-------------Figure 2--------------------')
+    #-------------Figure 2--------------------
     plot_Diebold_Mariano_pvalues(rps.iloc[back:,:], universe)
 
 
-    print('\n\n-------------Table 4--------------------')
+    #-------------Table 4--------------------
     mcs = MCS(rps.iloc[back:,:], size=0.05, seed=42)
     mcs.compute()
 
     if universe == 'M6+':
-        title = 'Table 4 (M6+).html'
+        title = 'results/Table 4 (M6+).html'
     elif universe == 'M6':
-        title = 'Table 4 (M6).html'
+        title = 'results/Table 4 (M6).html'
     else:
-        title = 'Table 4.html'
+        title = 'results/Table 4.html'
 
     # Report the models that belongt to MCS at the 95% statistical level
     (mcs.pvalues > 0.05).to_html(title)
 
 
 
-    print('\n\n-------------Table 7--------------------')
+    #------------Table 7--------------------
     if universe == 'M6+':
-        title = 'Table 7 (M6+).html'
+        title = 'results/Table 7 (M6+).html'
     elif universe == 'M6':
-        title = 'Table 7 (M6).html'
+        title = 'results/Table 7 (M6).html'
     else:
         title = 'Table 7.html'
 
@@ -872,11 +872,11 @@ def calculate_tables(universe, file_name, back, freq):
         acc_kl_acc2_top.append(sum(truth.values.argmax(axis=1) == results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].values.argmax(axis=1)))
 
 
-    print('\n\n-------------Table 10--------------------')
+    #-------------Table 10--------------------
     if universe == 'M6+':
-        title = 'Table 10 (Panel B).html'
+        title = 'results/Table 10 (Panel B).html'
     elif universe == 'M6':
-        title = 'Table 10 (Panel A).html'
+        title = 'results/Table 10 (Panel A).html'
     else:
         title = 'Table 10.html'
     results_top = pd.DataFrame(columns=['ENS_MCS','ENS_SMOOTH_RPS','ENS_RPS'], index=['RPS','W_RPS','pAUC', 'ECE','ACC'])
@@ -902,8 +902,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.REPLICATE_PAPER:
-        calculate_tables('M6', '/data/Results_M6.xlsx',  12, 6)
-        calculate_tables('M6+', '/data/Results_v2.xlsx', 36, 6)
+        calculate_tables('M6', '/output/Results_M6.xlsx',  12, 6)
+        calculate_tables('M6+', '/output/Results_v2.xlsx', 36, 6)
     else:
         calculate_tables('Other', args.FILE_NAME[0], args.TUNING_SAMPLE, args.FREQ)
 
