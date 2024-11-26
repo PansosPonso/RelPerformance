@@ -266,8 +266,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.REPLICATE_PAPER:
-        caclulate_metrics('/data/Results_M6.xlsx',  12)
-        caclulate_metrics('/data/Results_v2.xlsx', 36)
+        caclulate_metrics('/output/Results_M6.xlsx',  12)
+        caclulate_metrics('/output/Results_v2.xlsx', 36)
     else:
         caclulate_metrics(args.FILE_NAME[0], args.TUNING_SAMPLE)
 
