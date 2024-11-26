@@ -54,7 +54,8 @@ python Calculate_tables.py --file_name 'Results_m6.xlsx' --data_file 'Data_M6.xl
 - **file_name**: Specifies the file that contains the forecasts and the metrics.
 - **data_file**: Specifies the file that contains the price data.
 
-*This code takes <1 min for the M6 sample and <1 min for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.*
+> [!NOTE]
+> This code takes <1 min for the M6 sample and <1 min for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 ## Usage to generate new forecasts
 To run the models and generate the forecasts, use the following command:
@@ -93,9 +94,11 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 - **DeepAR**: [DeepAR: Probabilistic forecasting with autoregressive recurrent networks by Salinas et al. (2023)](https://arxiv.org/abs/1704.04110)
 - **PatchTST**: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers by Nie et al. (2023)](https://arxiv.org/abs/2211.14730)
 
-**Note that for the following models—DeepAR, PatchTST, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.**
+> [!IMPORTANT]
+> Note that for the following models—DeepAR, PatchTST, NF, VAE, LagLlama, and GAN—results may vary as their internal randomness cannot be fixed.
 
-*This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.*
+> [!NOTE]
+> This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 
 ## Contributing
