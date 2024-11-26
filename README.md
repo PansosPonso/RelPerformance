@@ -7,8 +7,9 @@ This repository contains the code for the paper titled "Predicting the Relative 
 
 ## Contents
 The main contents of the repository are the following:
-- \Data folder:
-- \Output folder:
+- data/ folder: This folder contains the raw data (Price data, Categorizations, Data from Kenneth Data Library)
+- output/ folder: This folder contains the excel file with the calculated idiosyncratic volatilities per asset
+- results/ folder: This folder contains the resulted forecasts and metrics
 
 
 ## Installation
