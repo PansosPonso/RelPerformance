@@ -1,6 +1,6 @@
 # Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches 
 
-Panagiotis Samartzis
+Author: Panagiotis Samartzis
 
 ## Introduction
 This repository contains the code for the paper titled "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches." The project includes various models to evaluate financial assets' relative performance using different datasets and methodologies.
