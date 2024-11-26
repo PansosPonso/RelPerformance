@@ -21,10 +21,16 @@ pip install -r requirements.txt
 ## Usage to replicate the results of the paper
 The following code generates the 9 tables and 2 figures for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
 
-To calculate all evaluation metrics, use the following command:
+To calculate all evaluation metrics, use the following command for the M6 sample:
 
 ```
 python Calculate_metrics.py --FILE_NAME Results_m6.xlsx --TUNING_SAMPLE 12
+```
+
+and the following command for the M6+ sample:
+
+```
+python Calculate_metrics.py --FILE_NAME Results_v2.xlsx --TUNING_SAMPLE 36
 ```
 
 ***Arguments***
