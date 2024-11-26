@@ -32,7 +32,8 @@ python Calculate_metrics.py --file_name Results_m6.xlsx --tuning_sample 12
 - **tuning_sample**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
 - **file_name**: Specifies the file that contains the forecasts.
 
-*This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.*
+> [!NOTE]
+> This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 
 To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
