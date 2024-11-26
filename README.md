@@ -66,7 +66,6 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 
 ***Arguments***
 
-- **M6**: If set to 1, evaluates models using the M6 data and evaluation period.
 - **YAHOO**: If set to 1, data are obtained from Yahoo Finance.
 - **KEEP_TUNING_FORECASTS**: Specifies whether to keep the forecasts that were generated for the tuning sample.
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
