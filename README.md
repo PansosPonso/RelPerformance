@@ -8,8 +8,8 @@ This repository contains the code for the paper titled "Predicting the Relative 
 ## Contents
 The main contents of the repository are the following:
 - data/ folder: This folder contains the raw input data (price data, categorizations, data from Kenneth Data Library and the asset universes)
-- output/ folder: This folder contains the excel file with the calculated idiosyncratic volatility per asset (the output of Calculate_id_vol.py)
-- results/ folder: This folder contains the generated forecasts and metrics, along with HTML files for all tables and JPG files for all figures (the outputs of Calculate_tables.py, Calculate_metrics.py and Generate_forecasts.py)
+- output/ folder: This folder contains the excel file with the calculated idiosyncratic volatility per asset and the generated models' forecasts and evaluation metrics (the output of Calculate_id_vol.py, Generate_forecasts.py and Calculate_metrics.py)
+- results/ folder: This folder contains the HTML files for all tables and JPG files for all figures in the paper (the outputs of Calculate_tables.py)
 
 
 ## Installation
@@ -106,6 +106,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 > [!NOTE]
 > This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
+## Idiosyncratic volatility calculation
 To calculate idiosyncratic volatility per asset, use the following command:
 
 ```
