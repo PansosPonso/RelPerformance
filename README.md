@@ -67,7 +67,7 @@ python Calculate_tables.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xl
 To run the models and generate the forecasts, use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --DATA_FROM_PREVIOUS_RUN Results_m6.xlsx
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 1 --DATA_FROM_PREVIOUS_RUN 'Results_m6.xlsx'
 ```
 
 ***Arguments***
@@ -105,6 +105,15 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 > [!NOTE]
 > This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
+To calculate idiosyncratic volatility per asset, use the following command:
+
+```
+python Calculate_id_vol.py --REPLICATE_PAPER 1
+```
+or, generally
+```
+python Calculate_id_vol.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xlsx'
+```
 
 ## Contributing
 We welcome contributions to improve the project. Please feel free to fork this repository and submit pull requests.
