@@ -10,17 +10,23 @@ from sklearn.metrics import roc_auc_score
 import arch.covariance.kernel as kernels
 import numpy as np
 from matplotlib.collections import QuadMesh
-from sklearn.linear_model import LinearRegression
 from matplotlib.text import Text
 from typing import Callable, Literal, Optional, Union
 from scipy.stats import t, chi2
+import argparse
 import warnings
-warnings.filterwarnings("ignore")
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
+
+# Set random seed for reproducibility
 RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
 
+#################### FUNCTIONS ####################
 
+# Functions gw, mgw, cmcs, elim_rule, validate_args and compute_covariance are obtained from https://github.com/ogrnz/feval
+# They are used to calculate the Model Confidence Set for the Ensemble method ENS_MCS
 def gw(
     L: np.array,
     tau: int,
@@ -304,15 +310,7 @@ def elim_rule(L: np.array, mcs: np.array, H: Optional[np.array] = None):
     L_hat[0, 0] = 1
     for i in range(L_to_use.shape[1] - 1):
         L_hat[0, i + 1] = L_hat[0, i] + delta_L_hat[i, 0]
-    '''
 
-    L_hat = np.zeros((1, new_k))
-    exp = np.array([0.1 * (1 - 0.1)**(t) for t in range(L_to_use.shape[0] - 1,-1,-1)])
-    for i in range(L_to_use.shape[1]):
-        model = AutoReg(L_to_use[:, i], lags=1).fit()
-        L_hat[0, i] = 0.8 * exp.T @ L_to_use[:, i] / np.sum(exp) + 0.2 * model.predict(start=L_to_use.shape[0], end=L_to_use.shape[0])[0]
-
-    '''
     # Rank losses
     indx = np.argmax(L_hat)
     col = np.unique(combinations[0, indx])
@@ -380,8 +378,9 @@ def compute_covariance(
         raise ValueError(f"Unsupported covariance style: {covar_style}")
 
 
-
+# This function returns the pvalue from comparing the RPS series s1 and s2, using the Diebold Mariano test
 def Diebold_Mariano_pvalue(s1, s2):
+
     d_lst = s1.values - s2.values
     mean_d = pd.Series(d_lst).mean()
 
@@ -390,21 +389,20 @@ def Diebold_Mariano_pvalue(s1, s2):
         autoCov = 0
         T = float(N)
         for i in np.arange(0, N-k):
-            autoCov += ((Xi[i+k])-Xs)*(Xi[i]-Xs)
-        return (1/(T))*autoCov
+            autoCov += ((Xi[i + k]) - Xs) * (Xi[i] - Xs)
+        return (1 / T) * autoCov
     gamma = []
     for lag in range(0,1):
-        gamma.append(autocovariance(d_lst,len(d_lst),lag,mean_d)) # 0, 1, 2
-    V_d = (gamma[0] + 2*sum(gamma[1:]))/float(len(d_lst))
-    DM_stat=V_d**(-0.5)*mean_d
-    harvey_adj=((float(len(d_lst))+1-2*1+1*(1-1)/float(len(d_lst)))/float(len(d_lst)))**(0.5)
-    DM_stat = harvey_adj*DM_stat
+        gamma.append(autocovariance(d_lst, len(d_lst), lag, mean_d))
+    V_d = (gamma[0] + 2 * sum(gamma[1:])) / float(len(d_lst))
+    DM_stat = V_d ** (-0.5) * mean_d
+    harvey_adj = ((float(len(d_lst)) - 1) / float(len(d_lst))) ** (0.5)
+    DM_stat = harvey_adj * DM_stat
 
-    #return 2*scipy.stats.t.cdf(-abs(DM_stat), df = float(len(d_lst)) - 1)
-    return round(scipy.stats.t.cdf(DM_stat, df = float(len(d_lst)) - 1),4)
+    return round(scipy.stats.t.cdf(DM_stat, df = float(len(d_lst)) - 1), 4)
 
-def plot_Diebold_Mariano_pvalues(forecasts):
-
+# Function that produces Figure 2
+def plot_Diebold_Mariano_pvalues(forecasts, universe):
 
     # Computing the multivariate DM test for each forecast pair
     p_values = pd.DataFrame(index=forecasts.columns, columns=forecasts.columns)
@@ -420,9 +418,6 @@ def plot_Diebold_Mariano_pvalues(forecasts):
                 # Find p-value
                 p_values.loc[model1, model2] = Diebold_Mariano_pvalue(forecasts.loc[:, model1], forecasts.loc[:, model2])
 
-
-                #w_stat, p_value = stats.wilcoxon(forecasts.loc[:, model1].values - forecasts.loc[:, model2].values, alternative='less')
-                #p_values.loc[model1, model2] = p_value
 
     p_values['# models outprf'] = (p_values < 0.05).sum(axis=1)
     p_values.iloc[:,0:-1] = p_values.iloc[:,0:-1].astype(float)[p_values.iloc[:,0:-1]<0.05]
@@ -443,9 +438,16 @@ def plot_Diebold_Mariano_pvalues(forecasts):
 
     ax.text(18.5, 16.5, 'Number of models outperformed by the corresponding model on the Y-axis', rotation=270, ha='center', va='bottom', color='black', fontweight='bold', fontsize=9)
 
+    if universe == 'M6+':
+        title = 'Figure 2 (M6+).jpg'
+    elif universe == 'M6':
+        title = 'Figure 2 (M6).jpg'
+    else:
+        title = 'Figure 2.jpg'
 
-    plt.show()
+    plt.savefig(title)
 
+# Function that calculates the RPS
 def RPS_calculation(truth, results):
 
     #Evaluate submission
@@ -455,6 +457,7 @@ def RPS_calculation(truth, results):
 
     return(np.round(np.mean(np.mean(np.power((target - frc), 2), axis=1)), 4))
 
+# Function that calculates the pAUC
 def calc_pauc(y_test, y_hat, fpr=0.2):
     pAUC = 0
     for i in range(5):
@@ -462,6 +465,7 @@ def calc_pauc(y_test, y_hat, fpr=0.2):
 
     return pAUC / 5
 
+# Function that calculates the ECE
 def calc_ece(samples, true_labels, M=5):
     # uniform binning approach with M number of bins
     bin_boundaries = np.linspace(0, 1, M + 1)
@@ -492,122 +496,145 @@ def calc_ece(samples, true_labels, M=5):
             ece += np.abs(avg_confidence_in_bin - accuracy_in_bin) * prob_in_bin
     return ece
 
-
-def calculate_tables(universe, file_name, data_file, back, freq):
-
-    m_names = ['KDE','GM','MND','GC','NF','DeepAR','GAN','VAE','Lag-Llama','NB','SR','LGBM','RF','SVM','MLP','BVAR','PatchTST']#,'EWMA']
+# The main function that produces all Tables and Figure in the paper
+def calculate_tables(universe, file_name, back, freq):
 
     # Read Data
+    # file_name contains the forecasts and all metrics necessary for the Tables
+    # 'Categorizations.xlsx' contains all categorizations referenced in Table 1
+    # 'F-Idiosyncratic_vol.xlsx' contains data for the idiosyncratic volatility of each asset
     #######################################
-    cats = pd.read_excel('Categorizations.xlsx', sheet_name='Models').rename(columns={'Unnamed: 0':'Models'})
-    asset_cats = pd.read_excel('Categorizations.xlsx', sheet_name='Assets').rename(columns={'Unnamed: 0':'Assets'})
+    cats = pd.read_excel('/data/Categorizations.xlsx', sheet_name='Models').rename(columns={'Unnamed: 0':'Models'})
+    asset_cats = pd.read_excel('data/Categorizations.xlsx', sheet_name='Assets').rename(columns={'Unnamed: 0':'Assets'})
     information_cal = pd.read_excel(file_name, sheet_name='Infocalib').set_index('Date')
     information = pd.read_excel(file_name, sheet_name='Info').set_index('Date')
     rps_assets = pd.read_excel(file_name, sheet_name='RPS_assets').rename(columns={'Unnamed: 0':'Assets'}).set_index('Assets')
     forecasts_data = pd.read_excel(file_name, sheet_name='forecasts')
-    mappings = pd.read_excel(data_file,sheet_name='Tickers')
-    closing_prices_df = pd.read_excel(data_file,sheet_name='Close')
-    ff = pd.read_excel('F-F_Research_Data_Factors_daily.xlsx').rename(columns={'Unnamed: 0':'Date'}).set_index('Date')
+    id_vol = pd.read_excel('/outputs/Idiosyncratic_vol.xlsx',sheet_name=universe)
     #######################################
+
+    m_names = [name for name in list(forecasts_data.columns) if "Unnamed" not in name][1:-1]
 
     tickers = forecasts_data.iloc[2:102,1].values.tolist()
     forecasts = pd.DataFrame(
                 index=pd.MultiIndex.from_tuples([(d, asset) for d in forecasts_data.iloc[2:,0][~pd.isna(forecasts_data.iloc[2:,0])].values for asset in tickers], names=['Date', 'Asset']),
-                columns=pd.MultiIndex.from_tuples([(m, r) for m in [name for name in forecasts_data.columns if "Unnamed" not in name][1:len(m_names)+1]+['truth'] for r in ["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]], names=['Models', 'Ranks']),
+                columns=pd.MultiIndex.from_tuples([(m, r) for m in [name for name in forecasts_data.columns if "Unnamed" not in name][1:] for r in ["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]], names=['Models', 'Ranks']),
                 dtype=float
         )
-
     forecasts.iloc[:,:] = pd.concat([forecasts_data.iloc[2:,2:len(m_names) * 5 + 2], forecasts_data.iloc[2:,-5:]], axis=1).values
 
 
-    mappings = mappings[['Ticker Factset', 'Ticker']].set_index('Ticker Factset').to_dict()['Ticker']
-    mappings['Unnamed: 0'] = 'Date'
-
-    closing_prices_df = closing_prices_df.rename(columns=mappings).set_index('Date')
-    closing_prices_df.index = pd.to_datetime(closing_prices_df.index, format='%d/%m/%Y')
-    closing_prices_df = closing_prices_df.resample('B').last()
-    closing_prices_df = closing_prices_df.iloc[1:,:]
-    closing_prices_df = closing_prices_df.ffill(axis=0)
-    rets = closing_prices_df.pct_change()
-    rets = rets[(rets.index >= forecasts.index.get_level_values(0).unique()[0]) & (rets.index <= forecasts.index.get_level_values(0).unique()[-1])]
-    rets = rets.merge(ff[['Mkt-RF','RF']] / 100,right_index=True,left_index=True)
-
-
-    id_vol = {}
-    for i in closing_prices_df.columns:
-        nonna_sample = ~rets.loc[:,i].isna()
-        y = rets.loc[nonna_sample,i].values.reshape(-1, 1) - rets.loc[nonna_sample,'RF'].values.reshape(-1, 1)
-        x = rets.loc[nonna_sample,'Mkt-RF'].values.reshape(-1, 1)
-        reg = LinearRegression().fit(y, x)
-        id_vol[i] = np.sqrt(250) * np.std(y - reg.predict(x))
-
-    results = pd.DataFrame(dict(sorted(id_vol.items(), key=lambda item: item[1])).items())
+    # vol contains the tickers for each idiosyncratic volatility tertile
     vol = {}
-    vol['Low'] = results.loc[results[1] <= results[1].describe([0.33, 0.67])['33%'], 0].values
-    vol['Medium'] = results.loc[(results[1] > results[1].describe([0.33, 0.67])['33%']) & (results[1] <= results[1].describe([0.33, 0.67])['67%']), 0].values
-    vol['High'] = results.loc[results[1] > results[1].describe([0.33, 0.67])['67%'], 0].values
-
-
-    print('\n--------------Table 9---------------------')
-    print('p-val difference in RPS between calibrated and uncalibrated models:')
-    for c in m_names:
-        print(c, round(information[c+'_RPS'].iloc[back:].mean(),4), round(information_cal[c+'_RPS'].iloc[back:].mean(),4), Diebold_Mariano_pvalue(information_cal[c+'_RPS'].iloc[back:], information[c+'_RPS'].iloc[back:]))
+    vol['Low'] = id_vol.loc[id_vol[1] <= id_vol[1].describe([0.33, 0.67])['33%'], 0].values
+    vol['Medium'] = id_vol.loc[(id_vol[1] > id_vol[1].describe([0.33, 0.67])['33%']) & (id_vol[1] <= id_vol[1].describe([0.33, 0.67])['67%']), 0].values
+    vol['High'] = id_vol.loc[id_vol[1] > id_vol[1].describe([0.33, 0.67])['67%'], 0].values
 
     keep_colummns = [item for item in information.columns if any(element in item for element in m_names)]
     information = information[keep_colummns]
 
     rps = information[[c for c in keep_colummns if '_RPS' in c]]
-    rps.columns = m_names
-
+    rps_cal = information_cal[[c for c in keep_colummns if '_RPS' in c]]
     acc = information[[c for c in keep_colummns if '_Acc' in c]]
     kl = information[[c for c in keep_colummns if '_KL' in c]]
     ece = information[[c for c in keep_colummns if '_ECE' in c]]
+    pauc = information[[c for c in keep_colummns if '_pAUC' in c]]
 
-    acc.columns = m_names
-    kl.columns = m_names
-    ece.columns = m_names
+    rps.columns = rps.columns.str.replace('_RPS$', '', regex=True)
+    acc.columns = acc.columns.str.replace('_Acc$', '', regex=True)
+    kl.columns = kl.columns.str.replace('_KL$', '', regex=True)
+    ece.columns = ece.columns.str.replace('_ECE$', '', regex=True)
+    pauc.columns = pauc.columns.str.replace('_pAUC$', '', regex=True)
+
+    m_names = rps.columns.tolist()
+
+    print('\n\n--------------Table 2 or 3--------------------')
+    if universe == 'M6':
+        title = 'Table 2'
+    else:
+        title = 'Table 3'
+
+    # Caclulate average RPS, pAUC, ECE and ACC scores and W_RPS, together with their statistical significance
+    temp_rps = pd.concat([rps.iloc[back:].mean(), rps.iloc[back:].mean().rank()], axis=1)
+    temp_w_rps = pd.concat([rps.iloc[back:].describe([0.05,0.95]).loc['95%',:], rps.iloc[back:].describe([0.05,0.95]).loc['95%',:].rank()], axis=1)
+    temp_pauc = pd.concat([pauc.iloc[back:].mean(), pauc.shape[1] + 1 - pauc.iloc[back:].mean().rank()], axis=1)
+    temp_ece = pd.concat([100 * ece.iloc[back:].mean(), ece.iloc[back:].mean().rank()], axis=1)
+    temp_acc = pd.concat([100 * acc.iloc[back:].mean(), acc.shape[1] + 1 - acc.iloc[back:].mean().rank()], axis=1)
+
+    pd.DataFrame(data = np.stack([np.where((rps.iloc[back:].mean() + t.ppf(1 - (1 - 0.95) / 2, rps.iloc[back:].shape[0] - 1) * rps.iloc[back:].std() / np.sqrt(rps.iloc[back:].shape[0]) < 0.16).values, temp_rps.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values + '*', temp_rps.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values),
+        np.where((rps.iloc[back:].describe([0.05,0.95]).loc['95%',:] < 0.16).values, temp_w_rps.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values + '*', temp_w_rps.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values),
+        np.where((information[[c for c in keep_colummns if '_PAUCBoot' in c]].iloc[back:].mean() > 0.5).values, temp_pauc.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values + '*', temp_pauc.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1).values),
+        np.where((ece.iloc[back:].mean() < 0.05).values, temp_ece.apply(lambda row: f"{row[0]:.2f} ({row[1]:.0f})", axis=1).values + '*', temp_ece.apply(lambda row: f"{row[0]:.2f} ({row[1]:.0f})", axis=1).values),
+        np.where((information[[c for c in keep_colummns if '_ACCBoot' in c]].iloc[back:].mean() > 0.2).values, temp_acc.apply(lambda row: f"{row[0]:.1f} ({row[1]:.0f})", axis=1).values + '*', temp_acc.apply(lambda row: f"{row[0]:.1f} ({row[1]:.0f})", axis=1).values)]).T, index = m_names, columns = ['RPS','W_RPS','pAUC','ECE','ACC']).to_html(title+'.html')
+
+
+
+    print('\n--------------Table 9---------------------')
+    dm_pvals = np.zeros(len(m_names))
+    for i,c in enumerate(m_names):
+        dm_pvals[i] = Diebold_Mariano_pvalue(information_cal[c+'_RPS'].iloc[back:], information[c+'_RPS'].iloc[back:])
+
+    if universe == 'M6+':
+        title = 'Table 9 (Panel B).html'
+    elif universe == 'M6':
+        title = 'Table 9 (Panel A).html'
+    else:
+        title = 'Table 9.html'
+
+    pd.DataFrame(data = np.stack([round(rps.iloc[back:].mean(),4),round(rps_cal.iloc[back:].mean(),4), dm_pvals]).T, index = m_names, columns = ['Raw output','Calibrated output','p-value']).to_html(title)
+
+
+    if 'EWMA' in rps.columns:
+        rps = rps.drop(columns=['EWMA'])
+        ece = ece.drop(columns=['EWMA'])
+        kl = kl.drop(columns=['EWMA'])
+        acc = acc.drop(columns=['EWMA'])
+        m_names_ex_ewma = rps.columns.tolist()
 
 
     print('\n\n--------------Table 8--------------------')
-    print('RPS by ETF asset class')
     rps_by_sector = pd.DataFrame(
-                index=m_names,
+                index=m_names_ex_ewma,
                 columns=asset_cats['Sector'].unique(),
                 data=0,
                 dtype=float
             )
     for c in asset_cats['Sector'].unique():
         rps_by_sector.loc[:, c] = rps_assets.loc[rps_assets.index.isin(rps_assets.index[asset_cats['Sector'] == c]), :].mean()
-    print(rps_by_sector.mean())
 
-    print('\nRPS by Asset type')
     rps_by_type = pd.DataFrame(
-                index=m_names,
+                index=m_names_ex_ewma,
                 columns=asset_cats['Type'].unique(),
                 data=0,
                 dtype=float
             )
     for c in asset_cats['Type'].unique():
         rps_by_type.loc[:, c] = rps_assets.loc[rps_assets.index.isin(rps_assets.index[asset_cats['Type'] == c]), :].mean()
-    print(rps_by_type.mean())
 
-
-    print('\nRPS by Idiosyncratic vol')
     rps_by_vol = pd.DataFrame(
-                index=m_names,
+                index=m_names_ex_ewma,
                 columns=['Low','Medium','High'],
                 data=0,
                 dtype=float
             )
     for c in ['Low','Medium','High']:
         rps_by_vol.loc[:, c] = rps_assets.loc[rps_assets.index.isin(vol[c]), :].mean()
-    print(rps_by_vol.mean())
-
-    # Asset type for asset with highest RPS
-    #print(asset_cats.loc[asset_cats['Assets'].isin(rps_assets.mean(axis=1).sort_values().tail(20).index),'Type'])
 
     if universe == 'M6+':
-        # Relationship among RPS, ACC and ECE
+        title = 'Table 8 (M6+).html'
+    elif universe == 'M6':
+        title = 'Table 8 (M6).html'
+    else:
+        title = 'Table 8.html'
+
+    with open(title, 'w') as _file:
+        _file.write('RPS by ETF asset class\n' + pd.DataFrame(rps_by_sector.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Asset type\n" + pd.DataFrame(rps_by_type.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Idiosyncratic vol\n" + pd.DataFrame(rps_by_vol.mean().round(4),columns=['RPS']).to_html())
+
+    # Asset type for asset with highest RPS
+    print(asset_cats.loc[asset_cats['Assets'].isin(rps_assets.mean(axis=1).sort_values().tail(20).index),'Type'])
+
+    if universe != 'M6':
+        # Relationship among RPS, ACC and ECE using simple OLS
         import statsmodels.api as sm
         X = sm.add_constant(np.concatenate([information[[c for c in information.columns if '_Acc' in c]].iloc[back:].mean().values.reshape(-1,1), information[[c for c in information.columns if '_ECE' in c]].iloc[back:].mean().values.reshape(-1,1)], axis=1))
         model = sm.OLS(information[[c for c in information.columns if '_RPS' in c]].iloc[back:].mean().values, X).fit()
@@ -615,40 +642,7 @@ def calculate_tables(universe, file_name, data_file, back, freq):
         print(model.summary())
 
 
-
-    print('\n\n-------------Table 2 or 3--------------------')
-
-    print('\nRPS')
-    temp = pd.concat([information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].mean(), information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].mean().rank()], axis=1)
-    print(temp.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1))
-
-    print('\nUpper 2.5% RPS')
-    print(round(information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].mean() + t.ppf(1 - (1 - 0.95) / 2, information.iloc[back:].shape[0] - 1) * information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].std() / np.sqrt(information.iloc[back:].shape[0]), 5))
-
-    print('\nW_RPS')
-    temp = pd.concat([information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].describe([0.05,0.95]).loc['95%',:], information[[c for c in keep_colummns if '_RPS' in c]].iloc[back:].describe([0.05,0.95]).loc['95%',:].rank()], axis=1)
-    print(temp.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1))
-
-    print('\npAUC')
-    temp = pd.concat([information[[c for c in keep_colummns if '_pAUC' in c]].iloc[back:].mean(), information[[c for c in keep_colummns if '_pAUC' in c]].shape[1] + 1 - information[[c for c in keep_colummns if '_pAUC' in c]].iloc[back:].mean().rank()], axis=1)
-    print(temp.apply(lambda row: f"{row[0]:.4f} ({row[1]:.0f})", axis=1))
-
-    print('\npAUC Bootstrap upper 2.5%')
-    print(round(information[[c for c in keep_colummns if '_PAUCBoot' in c]].iloc[back:].mean(), 4))
-
-    print('\nExpected Calibration Error')
-    temp = pd.concat([100 * information[[c for c in keep_colummns if '_ECE' in c]].iloc[back:].mean(), information[[c for c in keep_colummns if '_ECE' in c]].iloc[back:].mean().rank()], axis=1)
-    print(temp.apply(lambda row: f"{row[0]:.2f} ({row[1]:.0f})", axis=1))
-
-    print('\nAccuracies')
-    temp = pd.concat([100 * information[[c for c in keep_colummns if '_Acc' in c]].iloc[back:].mean(), information[[c for c in keep_colummns if '_Acc' in c]].shape[1] + 1 - information[[c for c in keep_colummns if '_Acc' in c]].iloc[back:].mean().rank()], axis=1)
-    print(temp.apply(lambda row: f"{row[0]:.1f} ({row[1]:.0f})", axis=1))
-
-    print('\nACC Bootstrap lower 2.5%')
-    print(round(100 * information[[c for c in keep_colummns if '_ACCBoot' in c]].iloc[back:].mean(), 4))
-
-
-    if universe == 'M6+':
+    if universe != 'M6':
         print('\n\n--------------Table 5--------------------')
         information.columns = pd.MultiIndex.from_tuples(
             [col.split('_') for col in keep_colummns],
@@ -669,8 +663,6 @@ def calculate_tables(universe, file_name, data_file, back, freq):
 
         a = pd.DataFrame(index=df_long['model'].unique(), columns=range(0,1000))
         for i in range(0,1000):
-            #d = np.random.choice(range(0,df_long['Date'].nunique() - 12), size=1)[0]
-            #bootstrap_problems = df_long['Date'].unique()[d:d+12]
             bootstrap_problems = np.random.choice(df_long['Date'].unique(), size=12, replace=True)
             bootstrap_metrics = np.random.choice(df_long['metric'].unique(), size=3, replace=True)
             df_sampled = df_long[df_long['Date'].isin(bootstrap_problems) & df_long['metric'].isin(bootstrap_metrics)]
@@ -681,69 +673,105 @@ def calculate_tables(universe, file_name, data_file, back, freq):
         for i in range(1,18):
             b.loc[:,i] = a[a==i].count(axis=1) / 10
 
-        print(b.loc[m_names])
+        b.loc[m_names_ex_ewma].to_html('Table 5.html')
 
     print('\n\n-------------Figure 2--------------------')
-    plot_Diebold_Mariano_pvalues(rps.iloc[back:,:])
+    plot_Diebold_Mariano_pvalues(rps.iloc[back:,:], universe)
 
 
-
+    print('\n\n-------------Table 4--------------------')
     mcs = MCS(rps.iloc[back:,:], size=0.05, seed=42)
     mcs.compute()
-    print('\n\n-------------Table 4--------------------')
-    print(mcs.pvalues > 0.05)
+
+    if universe == 'M6+':
+        title = 'Table 4 (M6+).html'
+    elif universe == 'M6':
+        title = 'Table 4 (M6).html'
+    else:
+        title = 'Table 4.html'
+
+    # Report the models that belongt to MCS at the 95% statistical level
+    (mcs.pvalues > 0.05).to_html(title)
 
 
 
     print('\n\n-------------Table 7--------------------')
-    print('\nModel Category 1')
+    if universe == 'M6+':
+        title = 'Table 7 (M6+).html'
+    elif universe == 'M6':
+        title = 'Table 7 (M6).html'
+    else:
+        title = 'Table 7.html'
+
+    #Model Category 1
     avgs = {}
     for c in cats['Cat1'].unique():
         avgs[c] = rps.iloc[back:,:][cats.loc[cats['Cat1'] == c, 'Models'].values].mean(axis=1)
 
+    # Caclulate all average RPS scores per category and then the Diebold-Mariano p values for all pairwise comparisons
+    avg_rps = {}
+    dm_pvals = {}
     for c1 in cats['Cat1'].unique():
-        print(c1, round(avgs[c1].mean(),4))
+        avg_rps[c1] = round(avgs[c1].mean(),4)
         for c2 in cats['Cat1'].unique():
             if c1 != c2:
-                print(c1, 'vs.', c2, Diebold_Mariano_pvalue(avgs[c1], avgs[c2]))
+                dm_pvals[c1 + ' vs. ' + c2] = Diebold_Mariano_pvalue(avgs[c1], avgs[c2])
 
-    print('\nModel Category 2')
+    with open(title, 'w') as _file:
+        _file.write('Model Category 1\n' + pd.DataFrame.from_dict(avg_rps.items()).rename(columns={0:'Model',1:'RPS'}).to_html(index=False) + "\nDiebold-Mariano test\n" + pd.DataFrame.from_dict(dm_pvals.items()).rename(columns={0:' ',1:'p-values'}).to_html(index=False))
+
+
+    #Model Category 2
     avgs = {}
     for c in cats['Cat2'].unique():
         avgs[c] = rps.iloc[back:,:][cats.loc[cats['Cat2'] == c, 'Models'].values].mean(axis=1)
 
+    avg_rps = {}
+    dm_pvals = {}
     for c1 in cats['Cat2'].unique():
-        print(c1, round(avgs[c1].mean(),4))
+        avg_rps[c1] = round(avgs[c1].mean(),4)
         for c2 in cats['Cat2'].unique():
             if c1 != c2:
-                print(c1, 'vs.', c2, Diebold_Mariano_pvalue(avgs[c1], avgs[c2]))
+                dm_pvals[c1 + ' vs. ' + c2] = Diebold_Mariano_pvalue(avgs[c1], avgs[c2])
 
-    print('\nModel Complexity')
+    with open(title, 'a') as _file:
+        _file.write('Model Category 2\n' + pd.DataFrame.from_dict(avg_rps.items()).rename(columns={0:'Model',1:'RPS'}).to_html(index=False) + "\nDiebold-Mariano test\n" + pd.DataFrame.from_dict(dm_pvals.items()).rename(columns={0:' ',1:'p-values'}).to_html(index=False))
+
+
+    #Model Complexity
     avgs = {}
     avgs['Low'] = rps.iloc[back:,:][cats.loc[cats['Complexity'] < cats['Complexity'].describe([0.33, 0.67])['33%'], 'Models'].values].mean(axis=1)
     avgs['Medium'] = rps.iloc[back:,:][cats.loc[(cats['Complexity'] >= cats['Complexity'].describe([0.33, 0.67])['33%']) & (cats['Complexity'] <= cats['Complexity'].describe([0.33, 0.67])['67%']), 'Models'].values].mean(axis=1)
     avgs['High'] = rps.iloc[back:,:][cats.loc[cats['Complexity'] > cats['Complexity'].describe([0.33, 0.67])['67%'], 'Models'].values].mean(axis=1)
 
-
+    avg_rps = {}
+    dm_pvals = {}
     for c1 in avgs.keys():
-        print(c1, round(avgs[c1].mean(),4))
+        avg_rps[c1] = round(avgs[c1].mean(),4)
         for c2 in avgs.keys():
             if c1 != c2:
-                print(c1, 'vs.', c2, Diebold_Mariano_pvalue(avgs[c1], avgs[c2]))
+                dm_pvals[c1 + ' vs. ' + c2] = Diebold_Mariano_pvalue(avgs[c1], avgs[c2])
+
+    with open(title, 'a') as _file:
+        _file.write('Model Complexity\n' + pd.DataFrame.from_dict(avg_rps.items()).rename(columns={0:'Model',1:'RPS'}).to_html(index=False) + "\nDiebold-Mariano test\n" + pd.DataFrame.from_dict(dm_pvals.items()).rename(columns={0:' ',1:'p-values'}).to_html(index=False))
 
 
-    print('\nModel Smoothness')
+    #Model Smoothness
     avgs = {}
     avgs['Low'] = rps.iloc[back:,:][cats.loc[cats['Smoothness'] < cats['Smoothness'].describe([0.33, 0.67])['33%'], 'Models'].values].mean(axis=1)
     avgs['Medium'] = rps.iloc[back:,:][cats.loc[(cats['Smoothness'] >= cats['Smoothness'].describe([0.33, 0.67])['33%']) & (cats['Smoothness'] <= cats['Complexity'].describe([0.33, 0.67])['67%']), 'Models'].values].mean(axis=1)
     avgs['High'] = rps.iloc[back:,:][cats.loc[cats['Smoothness'] > cats['Smoothness'].describe([0.33, 0.67])['67%'], 'Models'].values].mean(axis=1)
 
-
+    avg_rps = {}
+    dm_pvals = {}
     for c1 in avgs.keys():
-        print(c1, round(avgs[c1].mean(),4))
+        avg_rps[c1] = round(avgs[c1].mean(),4)
         for c2 in avgs.keys():
             if c1 != c2:
-                print(c1, 'vs.', c2, Diebold_Mariano_pvalue(avgs[c1], avgs[c2]))
+                dm_pvals[c1 + ' vs. ' + c2] = Diebold_Mariano_pvalue(avgs[c1], avgs[c2])
+
+    with open(title, 'a') as _file:
+        _file.write('Model Smoothness\n' + pd.DataFrame.from_dict(avg_rps.items()).rename(columns={0:'Model',1:'RPS'}).to_html(index=False) + "\nDiebold-Mariano test\n" + pd.DataFrame.from_dict(dm_pvals.items()).rename(columns={0:' ',1:'p-values'}).to_html(index=False))
 
 
     print('\n\n\nRun ensemble techniques.....')
@@ -765,33 +793,30 @@ def calculate_tables(universe, file_name, data_file, back, freq):
 
     TOP_N = 4
 
-
-
     for i in range(back, rps.shape[0]):
         rps_data = rps.iloc[i - back:i,:]
-
         ece_data = ece.iloc[i - back:i,:]
+        kl_data = kl.iloc[i - back:i,:]
 
         avgs = rps_data.mean()
         rps_score = (-avgs).rank()
-        kl_data = kl.iloc[i - back:i,:]
         avgs_kl = kl_data.mean()
+        # Caclulate the rank of models whose KL lies in [20%, 80%], by their RPS
         kl_acc_score2 = ((avgs_kl > avgs_kl.describe([0.2,0.8])['20%']) & (avgs_kl < avgs_kl.describe([0.2,0.8])['80%'])) * (-avgs).rank()
         d = rps.iloc[i,:].name
 
 
-        top_m_names = pd.Index(m_names)
+        top_m_names = pd.Index(m_names_ex_ewma)
 
         truth = pd.DataFrame(columns=["Rank1", "Rank2", "Rank3", "Rank4","Rank5"], data = forecasts.loc[d, ('truth', )].values)
 
-        ################################################################################
-        if (i < rps.shape[0] - 1) & ((i % freq == freq - 1) | (i == back)):
+        ############################# ENS_MCS #########################################
+        if (i < rps.shape[0] - 1) & ((i % freq == freq - 1) | (i == back)): # For every freq months, recaclulate the models that belong to the MCS
             print('Rebal at date: ', d)
             # Perform the unconditional mcs with an HAC estimator
             mcs, S, cval, pval, removed = cmcs(rps_data[top_m_names].values, covar_style="hac", kernel="Bartlett")
             #print('Unconditional models')
             unc_models = top_m_names[mcs.reshape(-1,) == 1].values
-            #print(unc_models)
 
 
         results = pd.DataFrame(columns=["ID", "Rank1", "Rank2", "Rank3", "Rank4","Rank5"])
@@ -808,9 +833,7 @@ def calculate_tables(universe, file_name, data_file, back, freq):
         ece_unc.append(calc_ece(results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].values, truth.values.argmax(axis=1)))
         acc_unc.append(sum(truth.values.argmax(axis=1) == results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].values.argmax(axis=1)))
 
-
-
-        ################################################################################
+        ############################### ENS_RPS ##################################
         if (i % freq == freq - 1) | (i == back):
             top_4 = [c for c, v in zip(rps_score.index, rps_score) if v >= heapq.nlargest(TOP_N, rps_score.values)[-1]]
 
@@ -829,7 +852,7 @@ def calculate_tables(universe, file_name, data_file, back, freq):
         ece_rps_top.append(calc_ece(results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].values, truth.values.argmax(axis=1)))
         acc_rps_top.append(sum(truth.values.argmax(axis=1) == results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].values.argmax(axis=1)))
 
-        ################################################################################
+        ################################ ENS_SMOOTH_RPS #####################################
         if (i % freq == freq - 1) | (i == back):
             top_kl_acc = [c for c, v in zip(kl_acc_score2.index, kl_acc_score2) if v >= heapq.nlargest(TOP_N, kl_acc_score2.values)[-1]]
 
@@ -850,34 +873,39 @@ def calculate_tables(universe, file_name, data_file, back, freq):
 
 
     print('\n\n-------------Table 10--------------------')
+    if universe == 'M6+':
+        title = 'Table 10 (Panel B).html'
+    elif universe == 'M6':
+        title = 'Table 10 (Panel A).html'
+    else:
+        title = 'Table 10.html'
     results_top = pd.DataFrame(columns=['ENS_MCS','ENS_SMOOTH_RPS','ENS_RPS'], index=['RPS','W_RPS','pAUC', 'ECE','ACC'])
     results_top['ENS_MCS'] = [np.round(np.mean(score_unc), 5), np.round(np.percentile(score_unc, 95), 4), np.round(np.mean(pauc_unc), 4), np.round(np.mean(ece_unc), 4), np.round(np.mean(acc_unc), 1)]
     results_top['ENS_SMOOTH_RPS'] = [np.round(np.mean(score_kl_acc2_top), 5), np.round(np.percentile(score_kl_acc2_top, 95), 4), np.round(np.mean(pauc_kl_acc2_top), 4), np.round(np.mean(ece_kl_acc2_top), 4), np.round(np.mean(acc_kl_acc2_top), 1)]
     results_top['ENS_RPS'] = [np.round(np.mean(score_rps_top), 5), np.round(np.percentile(score_rps_top, 95), 4), np.round(np.mean(pauc_rps_top), 4), np.round(np.mean(ece_rps_top), 4), np.round(np.mean(acc_rps_top), 1)]
-    print(results_top.T.sort_values(by=['RPS','W_RPS']))
+    results_top.T.sort_values(by=['RPS','W_RPS']).to_html(title)
 
-
+#################### FUNCTIONS ####################
 
 
 if __name__ == '__main__':
 
-    # To run: python Calculate_tables.py --file_name Results_m6.xlsx --tuning_sample 12 --M6 1
+    # To run: python Calculate_tables.py --REPLICATE_PAPER 1
+    # OR
+    # python Calculate_tables.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
 
-    parser = argparse.ArgumentParser(description='Calculate metrics')
-    parser.add_argument('--file_name', nargs='+', type=str, help="The file that contains the forecasts")
-    parser.add_argument('--tuning_sample', nargs='?', type=int, const=0, default=12)
-    parser.add_argument('--freq', nargs='?', type=int, const=0, default=6)
-    parser.add_argument('--M6', nargs='?', type=int, const=1, default=1)
+    parser = argparse.ArgumentParser(description='Calculate tables and figures')
+    parser.add_argument('--FILE_NAME', nargs='?', type=str, help="The file that contains the forecasts")
+    parser.add_argument('--TUNING_SAMPLE', nargs='?', type=int, const=0, default=12, help="The size of the tuning sample. 0 if no tuning sample exists.")
+    parser.add_argument('--FREQ', nargs='?', type=int, const=0, default=6)
+    parser.add_argument('--REPLICATE_PAPER', nargs='?', type=int, const=1, default=0)
     args = parser.parse_args()
 
-    if args.M6:
-        universe = 'M6'
-        data_file = 'Data_M6.xlsx'
+    if args.REPLICATE_PAPER:
+        calculate_tables('M6', '/data/Results_M6.xlsx',  12, 6)
+        calculate_tables('M6+', '/data/Results_v2.xlsx', 36, 6)
     else:
-        universe = 'M6+'
-        data_file = 'Data_v2.xlsx'
-
-    calculate_tables(universe, args.file_name, data_file, args.tuning_sample, args.freq)
+        calculate_tables('Other', args.FILE_NAME[0], args.TUNING_SAMPLE, args.FREQ)
 
 
     print('\nTask completed...')
