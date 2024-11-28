@@ -333,6 +333,7 @@ def prepare_data(data_universe, data_file):
     train_df['target'] = train_df_temp['value']
 
 
+
     train_df_temp = feat_0.reset_index().melt(id_vars=['Date'], value_vars=tickers)
     train_df['feat_0'] = train_df_temp['value']
     train_df_temp = feat_1.reset_index().melt(id_vars=['Date'], value_vars=tickers)
@@ -374,8 +375,10 @@ def prepare_data(data_universe, data_file):
     le = LabelEncoder()
     train_df['AssetClass'] = le.fit_transform(train_df['AssetClass'])
 
-    train_df['target'] = train_df['target'].astype('int32')
+    train_df['target'] = train_df['target'].astype('int32').clip(lower=0)
+
     train_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
 
     # Drop rows with nas and also keep data from 2010 onwards
     train_df = train_df[train_df['Date'].isin(drop[~drop].index)]
@@ -705,11 +708,11 @@ class Generate_forecasts:
 
 if __name__ == '__main__':
 
-    # To run: python M6_main_light.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --M6 0 --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
+    # To run: python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama EWMA --KEEP_TUNING_FORECASTS 1 --SAMPLE 'M6+' --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
 
     parser = argparse.ArgumentParser(description='Generate forecasts')
     parser.add_argument('--MODEL_NAMES', nargs='+', type=str, help="Add the models you want to run")
-    parser.add_argument('--M6', nargs='?', type=int, const=1, default=1)
+    parser.add_argument('--SAMPLE', nargs='?', type=str, help="M6 for M6 sample, M6+ for M6+ sample and other for other")
     parser.add_argument('--KEEP_TUNING_FORECASTS', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--TUNING', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--DATA_FROM_PREVIOUS_RUN', nargs='?', type=str, const=None, default=None)
@@ -717,22 +720,30 @@ if __name__ == '__main__':
 
     print(f'\n\nSelected models: {args.MODEL_NAMES}')
 
-    if args.M6:
+    if args.SAMPLE == 'M6':
         start_oos_date = '2022-03-04'
         end_oos_date = '2023-02-03'
         start_valid_date = '2021-03-05'
         end_valid_date = '2022-02-04'
-        data_file = '/data/Data_M6.xlsx'
-        data_universe = '/data/Universe_M6.xlsx'
-        results_file = '/results/Results_m6.xlsx'
+        data_file = 'data/Data_M6.xlsx'
+        data_universe = 'data/Universe_M6.xlsx'
+        results_file = 'outputs/Results_M6.xlsx'
+    elif args.SAMPLE == 'M6+':
+        start_oos_date = '2014-10-17'
+        end_oos_date = '2023-12-29'
+        start_valid_date = '2011-12-16'
+        end_valid_date = '2014-09-19'
+        data_file = 'data/Data_v2.xlsx'
+        data_universe = 'data/Universe_v2.xlsx'
+        results_file = 'outputs/Results_v2.xlsx'
     else:
         start_oos_date = '2014-10-17'
         end_oos_date = '2023-12-29'
         start_valid_date = '2011-12-16'
         end_valid_date = '2014-09-19'
-        data_file = '/data/Data_v2.xlsx'
-        data_universe = '/data/Universe_v2.xlsx'
-        results_file = '/results/Results_v2.xlsx'
+        data_file = 'data/Data_other.xlsx'
+        data_universe = 'data/Universe_other.xlsx'
+        results_file = 'outputs/Results_otherxlsx'
 
     start_oos_date = datetime.datetime.strptime(start_oos_date, '%Y-%m-%d')
     end_oos_date = datetime.datetime.strptime(end_oos_date, '%Y-%m-%d')

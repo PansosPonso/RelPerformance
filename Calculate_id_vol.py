@@ -23,7 +23,7 @@ def calc_id_vol(universe, file_name, data_file):
     forecasts_data = pd.read_excel(file_name, sheet_name='forecasts')
     mappings = pd.read_excel(data_file,sheet_name='Tickers')
     closing_prices_df = pd.read_excel(data_file,sheet_name='Close')
-    ff = pd.read_excel('F-F_Research_Data_Factors_daily.xlsx').rename(columns={'Unnamed: 0':'Date'}).set_index('Date')
+    ff = pd.read_excel('data/F-F_Research_Data_Factors_daily.xlsx').rename(columns={'Unnamed: 0':'Date'}).set_index('Date')
 
     m_names = [name for name in list(forecasts_data.columns) if "Unnamed" not in name][1:-1]
 
@@ -59,28 +59,22 @@ def calc_id_vol(universe, file_name, data_file):
 
     results = pd.DataFrame(dict(sorted(id_vol.items(), key=lambda item: item[1])).items())
 
-    write_or_append_to_excel(results, '/outputs/Idiosyncratic_vol.xlsx', universe)
+    write_or_append_to_excel(results, 'outputs/Idiosyncratic_vol.xlsx', universe)
 
 #################### FUNCTIONS ####################
 
 
 if __name__ == '__main__':
 
-    # To run: python Calculate_id_vol.py --REPLICATE_PAPER 1
-    # OR
-    # python Calculate_id_vol.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xlsx'
+    # python Calculate_id_vol.py --SAMPLE 'M6' --FILE_NAME 'outputs/Results_M6.xlsx' --DATA_FILE 'data/Data_M6.xlsx'
 
     parser = argparse.ArgumentParser(description='Calculate tables and figures')
     parser.add_argument('--FILE_NAME', nargs='?', type=str, help="The file that contains the forecasts")
     parser.add_argument('--DATA_FILE', nargs='?', type=str, help="The file that contains the price data")
-    parser.add_argument('--REPLICATE_PAPER', nargs='?', type=int, const=1, default=0)
+    parser.add_argument('--SAMPLE', nargs='?', type=str, help="M6 for M6 sample, M6+ for M6+ sample and other for other")
     args = parser.parse_args()
 
-    if args.REPLICATE_PAPER:
-        calc_id_vol('M6','/data/Results_M6.xlsx', 'Data_M6.xlsx')
-        calc_id_vol('M6+','/data/Results_v2.xlsx', 'Data_v2.xlsx')
-    else:
-        calc_id_vol('Other', args.FILE_NAME[0], args.DATA_FILE[0])
+    calc_id_vol(args.SAMPLE, args.FILE_NAME, args.DATA_FILE)
 
 
     print('\nTask completed...')

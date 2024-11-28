@@ -16,6 +16,7 @@ from scipy.stats import t, chi2
 import argparse
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings(action='ignore', category=DeprecationWarning) 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
@@ -499,18 +500,20 @@ def calc_ece(samples, true_labels, M=5):
 # The main function that produces all Tables and Figure in the paper
 def calculate_tables(universe, file_name, back, freq):
 
+    print(f'\n\nGenerating results for {universe}')
+
     # Read Data
     # file_name contains the forecasts and all metrics necessary for the Tables
     # 'Categorizations.xlsx' contains all categorizations referenced in Table 1
     # 'F-Idiosyncratic_vol.xlsx' contains data for the idiosyncratic volatility of each asset
     #######################################
-    cats = pd.read_excel('/data/Categorizations.xlsx', sheet_name='Models').rename(columns={'Unnamed: 0':'Models'})
+    cats = pd.read_excel('data/Categorizations.xlsx', sheet_name='Models').rename(columns={'Unnamed: 0':'Models'})
     asset_cats = pd.read_excel('data/Categorizations.xlsx', sheet_name='Assets').rename(columns={'Unnamed: 0':'Assets'})
     information_cal = pd.read_excel(file_name, sheet_name='Infocalib').set_index('Date')
     information = pd.read_excel(file_name, sheet_name='Info').set_index('Date')
     rps_assets = pd.read_excel(file_name, sheet_name='RPS_assets').rename(columns={'Unnamed: 0':'Assets'}).set_index('Assets')
     forecasts_data = pd.read_excel(file_name, sheet_name='forecasts')
-    id_vol = pd.read_excel('/outputs/Idiosyncratic_vol.xlsx',sheet_name=universe)
+    id_vol = pd.read_excel('outputs/Idiosyncratic_vol.xlsx',sheet_name=universe)
     #######################################
 
     m_names = [name for name in list(forecasts_data.columns) if "Unnamed" not in name][1:-1]
@@ -589,7 +592,9 @@ def calculate_tables(universe, file_name, back, freq):
         ece = ece.drop(columns=['EWMA'])
         kl = kl.drop(columns=['EWMA'])
         acc = acc.drop(columns=['EWMA'])
-        m_names_ex_ewma = rps.columns.tolist()
+
+    m_names_ex_ewma = rps.columns.tolist()
+    cats = cats.loc[cats['Models'].isin(m_names_ex_ewma), :].reset_index(drop=True)
 
 
     #--------------Table 8--------------------
@@ -630,20 +635,24 @@ def calculate_tables(universe, file_name, back, freq):
     with open(title, 'w') as _file:
         _file.write('RPS by ETF asset class\n' + pd.DataFrame(rps_by_sector.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Asset type\n" + pd.DataFrame(rps_by_type.mean().round(4),columns=['RPS']).to_html() + "\nRPS by Idiosyncratic vol\n" + pd.DataFrame(rps_by_vol.mean().round(4),columns=['RPS']).to_html())
 
-    # Asset type for asset with highest RPS
-    print(asset_cats.loc[asset_cats['Assets'].isin(rps_assets.mean(axis=1).sort_values().tail(20).index),'Type'])
+    if universe != 'M6':
+        print('\n\n--------------Footnote 11, section 3.4--------------------')
+        num_etfs = (asset_cats.loc[asset_cats['Assets'].isin(rps_assets.mean(axis=1).sort_values().tail(20).index),'Type'] == 'ETF').sum()
+        print(f'\nAmong the 20 assets with highest RPS, {num_etfs} are ETFs')
+        num_etfs = (asset_cats.loc[asset_cats['Assets'].isin(rps_assets.mean(axis=1).sort_values().head(20).index),'Type'] == 'ETF').sum()
+        print(f'\nAmong the 20 assets with lowest RPS, {num_etfs} are ETFs')
 
     if universe != 'M6':
+        print('\n\n--------------Comment 4, section 3.1--------------------')
         # Relationship among RPS, ACC and ECE using simple OLS
         import statsmodels.api as sm
         X = sm.add_constant(np.concatenate([information[[c for c in information.columns if '_Acc' in c]].iloc[back:].mean().values.reshape(-1,1), information[[c for c in information.columns if '_ECE' in c]].iloc[back:].mean().values.reshape(-1,1)], axis=1))
         model = sm.OLS(information[[c for c in information.columns if '_RPS' in c]].iloc[back:].mean().values, X).fit()
-        print('\n\n--------------Comment 4, section 3.1--------------------')
         print(model.summary())
 
 
     if universe != 'M6':
-        print('\n\n--------------Table 5--------------------')
+        #--------------Table 5--------------------
         information.columns = pd.MultiIndex.from_tuples(
             [col.split('_') for col in keep_colummns],
             names=['model', 'metric'])
@@ -702,7 +711,7 @@ def calculate_tables(universe, file_name, back, freq):
         title = 'results/Table 7 (M6).html'
     else:
         title = 'Table 7.html'
-
+    
     #Model Category 1
     avgs = {}
     for c in cats['Cat1'].unique():
@@ -774,7 +783,7 @@ def calculate_tables(universe, file_name, back, freq):
         _file.write('Model Smoothness\n' + pd.DataFrame.from_dict(avg_rps.items()).rename(columns={0:'Model',1:'RPS'}).to_html(index=False) + "\nDiebold-Mariano test\n" + pd.DataFrame.from_dict(dm_pvals.items()).rename(columns={0:' ',1:'p-values'}).to_html(index=False))
 
 
-    print('\n\n\nRun ensemble techniques.....')
+    # Run ensemble techniques
     score_rps_top = []
     score_kl_acc2_top = []
     score_unc = []
@@ -812,7 +821,6 @@ def calculate_tables(universe, file_name, back, freq):
 
         ############################# ENS_MCS #########################################
         if (i < rps.shape[0] - 1) & ((i % freq == freq - 1) | (i == back)): # For every freq months, recaclulate the models that belong to the MCS
-            print('Rebal at date: ', d)
             # Perform the unconditional mcs with an HAC estimator
             mcs, S, cval, pval, removed = cmcs(rps_data[top_m_names].values, covar_style="hac", kernel="Bartlett")
             #print('Unconditional models')
@@ -892,20 +900,21 @@ if __name__ == '__main__':
 
     # To run: python Calculate_tables.py --REPLICATE_PAPER 1
     # OR
-    # python Calculate_tables.py --FILE_NAME 'Results_m6.xlsx' --DATA_FILE 'Data_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
+    # python Calculate_tables.py --SAMPLE 'M6' --FILE_NAME 'outputs/Results_M6_with_metrics.xlsx' --TUNING_SAMPLE 12 --FREQ 6
 
     parser = argparse.ArgumentParser(description='Calculate tables and figures')
     parser.add_argument('--FILE_NAME', nargs='?', type=str, help="The file that contains the forecasts")
     parser.add_argument('--TUNING_SAMPLE', nargs='?', type=int, const=0, default=12, help="The size of the tuning sample. 0 if no tuning sample exists.")
     parser.add_argument('--FREQ', nargs='?', type=int, const=0, default=6)
     parser.add_argument('--REPLICATE_PAPER', nargs='?', type=int, const=1, default=0)
+    parser.add_argument('--SAMPLE', nargs='?', type=str, help="M6 for M6 sample, M6+ for M6+ sample and other for other")
     args = parser.parse_args()
 
     if args.REPLICATE_PAPER:
-        calculate_tables('M6', '/output/Results_M6.xlsx',  12, 6)
-        calculate_tables('M6+', '/output/Results_v2.xlsx', 36, 6)
+        calculate_tables('M6', 'outputs/Results_M6_with_metrics.xlsx',  12, 6)
+        calculate_tables('M6+', 'outputs/Results_v2_with_metrics.xlsx', 36, 6)
     else:
-        calculate_tables('Other', args.FILE_NAME[0], args.TUNING_SAMPLE, args.FREQ)
+        calculate_tables(args.SAMPLE, args.FILE_NAME, args.TUNING_SAMPLE, args.FREQ)
 
 
     print('\nTask completed...')

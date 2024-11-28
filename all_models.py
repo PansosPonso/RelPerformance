@@ -894,7 +894,11 @@ class llama_model(Base_Model):
         scaled_train_df = pd.DataFrame(data=(train_df.values - train_df.mean(axis=1).values.reshape((train_df.shape[0],1))) / train_df.std(axis=1).values.reshape((train_df.shape[0],1)), columns=train_df.columns, index=train_df.index)
         self.dataset = PandasDataset(dict(scaled_train_df))
 
-        ckpt = torch.load("lag_llama/lag-llama.ckpt", map_location=torch.device('cuda:0'))
+        if torch.cuda.is_available() and torch.cuda.device_count() > 0:
+            ckpt = torch.load("lag_llama/lag-llama.ckpt", map_location=torch.device('cuda:0'))
+        else:
+            ckpt = torch.load("lag_llama/lag-llama.ckpt", map_location=torch.device('cpu'))
+
         estimator_args = ckpt["hyper_parameters"]["model_kwargs"]
 
         estimator = LagLlamaEstimator(

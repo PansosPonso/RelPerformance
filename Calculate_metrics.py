@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
+import os
 import warnings
 from sklearn.metrics import roc_auc_score
 import argparse
+import tqdm
+import shutil
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LinearRegression
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -125,11 +128,17 @@ def isotonic_calibration(in_sample_preds, in_sample_y_true, out_sample_preds):
 
     return calibrated_probs / calibrated_probs.sum(axis=1).reshape(-1,1)
 
+
 # The main function that caclulates all evaluation metrics
-def caclulate_metrics(file_name, back):
+def calculate_metrics(file_name, back):
+
+    base, ext = os.path.splitext(file_name)
+    output_name = f'{base}_with_metrics{ext}'
+
+    shutil.copy(file_name, output_name)
 
     m_names = ['KDE','GM','MND','GC','NF','DeepAR','GAN','VAE','Lag-Llama','NB','SR','LGBM','RF','SVM','MLP','BVAR','PatchTST','EWMA']
-
+    
     # Get forecast data from all models
     forecasts_data = pd.read_excel(file_name, sheet_name='forecasts')
     m_names = sorted([name for name in list(forecasts_data.columns) if "Unnamed" not in name][1:-1], key=lambda x: m_names.index(x))
@@ -178,7 +187,7 @@ def caclulate_metrics(file_name, back):
             calibrated_forecasts.loc[d, (c, )] = isotonic_calibration(X_train.values, y_train, forecasts.loc[d, (c, )].values)
 
 
-    for c in m_names: # For each model
+    for c in tqdm.tqdm(m_names): # For each model
         print(c)
         for i,d in enumerate(forecasts.index.get_level_values(0).unique()): # For each month in the sample
 
@@ -217,7 +226,7 @@ def caclulate_metrics(file_name, back):
             information[c + '_ACCBoot'].loc[d] = acc_CI_low
             information[c + '_PAUCBoot'].loc[d] = auc_CI_low
 
-            ############## The same for calibrated forecasts ###################
+            ############## Do the same for calibrated forecasts ###################
 
             acc = sum(calibrated_forecasts.loc[d, (c, )].values.argmax(axis=1) == calibrated_forecasts.loc[d, ('truth', )].values.argmax(axis=1)) / 100
 
@@ -245,8 +254,9 @@ def caclulate_metrics(file_name, back):
 
         rps_assets.loc[:, c] /= (forecasts.index.get_level_values(0).nunique() - back)
 
+    
 
-    with pd.ExcelWriter(file_name, mode='a', engine='openpyxl', if_sheet_exists='replace') as writer:
+    with pd.ExcelWriter(output_name, mode='a', engine='openpyxl', if_sheet_exists='replace') as writer:
         information.to_excel(writer, sheet_name='Info')
         calibrated_information.to_excel(writer, sheet_name='Infocalib')
         rps_assets.to_excel(writer, sheet_name='RPS_assets')
@@ -257,7 +267,7 @@ if __name__ == '__main__':
 
     # To run: python Calculate_metrics.py --REPLICATE_PAPER 1
     # OR
-    # To run: python Calculate_metrics.py --FILE_NAME 'Results_m6.xlsx' --TUNING_SAMPLE 12
+    # To run: python Calculate_metrics.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12
 
     parser = argparse.ArgumentParser(description='Calculate metrics')
     parser.add_argument('--FILE_NAME', nargs='?', type=str, help="The file that contains the forecasts")
@@ -266,10 +276,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.REPLICATE_PAPER:
-        caclulate_metrics('/output/Results_M6.xlsx',  12)
-        caclulate_metrics('/output/Results_v2.xlsx', 36)
+        print('\nGenerating metrics for M6\n')
+        calculate_metrics('outputs/Results_M6.xlsx',  12)
+
+        print('\nGenerating metrics for M6+\n')
+        calculate_metrics('outputs/Results_v2.xlsx', 36)
     else:
-        caclulate_metrics(args.FILE_NAME[0], args.TUNING_SAMPLE)
+        calculate_metrics(args.FILE_NAME, args.TUNING_SAMPLE)
 
 
     print('\nTask completed...')
