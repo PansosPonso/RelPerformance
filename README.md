@@ -135,7 +135,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 - **PatchTST**: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers by Nie et al. (2023)](https://arxiv.org/abs/2211.14730)
 
 > [!IMPORTANT]
-> Note that the results of most models can vary between runs due to inherent randomness that cannot be fully controlled. Additionally, results may vary depending on whether the models are trained on a CPU or GPU.
+> Note that the results of most models can vary between runs due to inherent randomness that cannot be fully controlled, as well as differences in hardware configurations (CPU vs. GPU). The results of the paper were generated in a WSL2 environment with GPU support.
 
 > [!NOTE]
 > This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU. When running on CPU, the time is approximately 4 times longer.
