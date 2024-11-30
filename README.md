@@ -103,7 +103,7 @@ python Calculate_tables.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE
 To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --KEEP_TUNING_FORECASTS 1 --SAMPLE 'M6'
+python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --SAMPLE 'M6'
 ```
 
 ***Arguments***
