@@ -58,7 +58,7 @@ Run the relevant python scripts (see below).
 
 
 ## Usage to replicate the results of the paper
-Step 1. The following code generates Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
+**Step 1.** The following code generates Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
 
   To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
 
@@ -78,9 +78,9 @@ Step 1. The following code generates Tables 2-10 and Figures 1-2 for the paper "
   > [!NOTE]
   > This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
----
+  ---
 
-Step 2. To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
+**Step 2.** To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
 
   ```
   python Generate_tables_and_figures.py --REPLICATE_PAPER 1
