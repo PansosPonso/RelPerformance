@@ -640,7 +640,7 @@ class Generate_forecasts:
 
 if __name__ == '__main__':
 
-    # To run: python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama EWMA --SAMPLE 'M6+' --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
+    # To run: python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama --SAMPLE 'M6+' --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
 
     parser = argparse.ArgumentParser(description='Generate forecasts')
     parser.add_argument('--MODEL_NAMES', nargs='+', type=str, help="Add the models you want to run")
