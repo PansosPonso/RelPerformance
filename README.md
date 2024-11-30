@@ -8,7 +8,7 @@ This repository contains the code for the paper titled "Predicting the Relative 
 The main contents of the repository are the following:
 
 - data/ folder: This folder contains the raw input data:
-  - _Data_M6.xlsx_ and _Data_v2.xlsx_: price & volume data for M6 and M6+ samples,
+  - _Data_M6.xlsx_ and _Data_v2.xlsx_: price & volume data for M6 and M6+ samples (the latter being a significantly larger sample),
   - _Categorizations.xlsx_: asset & model categorizations,
   - _F-F_Research_Data_Factors_daily.xlsx_: data from Kenneth Data Library and
   - _Universe_M6.xlsx_ and _Universe_v2.xlsx_: the asset universes for M6 and M6+ samples.
