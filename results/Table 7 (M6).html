@@ -2,22 +2,18 @@ Model Category 1
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Model</th>
       <th>RPS</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Probabilistic</td>
-      <td>0.1577</td>
+      <td>0.1602</td>
     </tr>
     <tr>
-      <td>Classification</td>
-      <td>0.1568</td>
+      <td>0.1579*</td>
     </tr>
     <tr>
-      <td>Time series</td>
-      <td>0.1642</td>
+      <td>0.1612</td>
     </tr>
   </tbody>
 </table>
@@ -32,45 +28,45 @@ Diebold-Mariano test
   <tbody>
     <tr>
       <td>Probabilistic vs. Classification</td>
-      <td>0.9684</td>
+      <td>0.9862</td>
     </tr>
     <tr>
       <td>Probabilistic vs. Time series</td>
-      <td>0.0011</td>
+      <td>0.1732</td>
     </tr>
     <tr>
       <td>Classification vs. Probabilistic</td>
-      <td>0.0316</td>
+      <td>0.0138</td>
     </tr>
     <tr>
       <td>Classification vs. Time series</td>
-      <td>0.0005</td>
+      <td>0.0003</td>
     </tr>
     <tr>
       <td>Time series vs. Probabilistic</td>
-      <td>0.9989</td>
+      <td>0.8268</td>
     </tr>
     <tr>
       <td>Time series vs. Classification</td>
-      <td>0.9995</td>
+      <td>0.9997</td>
     </tr>
   </tbody>
 </table>Model Category 2
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Model</th>
       <th>RPS</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Statistical</td>
-      <td>0.1607</td>
+      <td>0.1594</td>
     </tr>
     <tr>
-      <td>Deep learning</td>
-      <td>0.1575</td>
+      <td>0.1608</td>
+    </tr>
+    <tr>
+      <td>0.1581*</td>
     </tr>
   </tbody>
 </table>
@@ -85,33 +81,45 @@ Diebold-Mariano test
   <tbody>
     <tr>
       <td>Statistical vs. Deep learning</td>
-      <td>0.9991</td>
+      <td>0.1311</td>
+    </tr>
+    <tr>
+      <td>Statistical vs. Machine learning</td>
+      <td>0.8322</td>
     </tr>
     <tr>
       <td>Deep learning vs. Statistical</td>
-      <td>0.0009</td>
+      <td>0.8689</td>
+    </tr>
+    <tr>
+      <td>Deep learning vs. Machine learning</td>
+      <td>1.0000</td>
+    </tr>
+    <tr>
+      <td>Machine learning vs. Statistical</td>
+      <td>0.1678</td>
+    </tr>
+    <tr>
+      <td>Machine learning vs. Deep learning</td>
+      <td>0.0000</td>
     </tr>
   </tbody>
 </table>Model Complexity
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Model</th>
       <th>RPS</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Low</td>
-      <td>0.1572</td>
+      <td>0.1582*</td>
     </tr>
     <tr>
-      <td>Medium</td>
-      <td>0.1612</td>
+      <td>0.1603</td>
     </tr>
     <tr>
-      <td>High</td>
-      <td>0.1568</td>
+      <td>0.1601</td>
     </tr>
   </tbody>
 </table>
@@ -126,49 +134,45 @@ Diebold-Mariano test
   <tbody>
     <tr>
       <td>Low vs. Medium</td>
-      <td>0.0056</td>
+      <td>0.0063</td>
     </tr>
     <tr>
       <td>Low vs. High</td>
-      <td>0.8196</td>
+      <td>0.0039</td>
     </tr>
     <tr>
       <td>Medium vs. Low</td>
-      <td>0.9944</td>
+      <td>0.9937</td>
     </tr>
     <tr>
       <td>Medium vs. High</td>
-      <td>0.9990</td>
+      <td>0.5542</td>
     </tr>
     <tr>
       <td>High vs. Low</td>
-      <td>0.1804</td>
+      <td>0.9961</td>
     </tr>
     <tr>
       <td>High vs. Medium</td>
-      <td>0.0010</td>
+      <td>0.4458</td>
     </tr>
   </tbody>
-</table>Model Smoothness
+</table>Output Smoothness
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Model</th>
       <th>RPS</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Low</td>
-      <td>0.1572</td>
+      <td>0.1609</td>
     </tr>
     <tr>
-      <td>Medium</td>
-      <td>0.1597</td>
+      <td>0.1590*</td>
     </tr>
     <tr>
-      <td>High</td>
-      <td>0.1642</td>
+      <td>0.1584*</td>
     </tr>
   </tbody>
 </table>
@@ -183,27 +187,27 @@ Diebold-Mariano test
   <tbody>
     <tr>
       <td>Low vs. Medium</td>
-      <td>0.0128</td>
+      <td>0.9138</td>
     </tr>
     <tr>
       <td>Low vs. High</td>
-      <td>0.0016</td>
+      <td>0.9530</td>
     </tr>
     <tr>
       <td>Medium vs. Low</td>
-      <td>0.9872</td>
+      <td>0.0862</td>
     </tr>
     <tr>
       <td>Medium vs. High</td>
-      <td>0.0007</td>
-    </tr>
-    <tr>
-      <td>High vs. Low</td>
-      <td>0.9984</td>
-    </tr>
-    <tr>
-      <td>High vs. Medium</td>
       <td>0.9993</td>
+    </tr>
+    <tr>
+      <td>High vs. Low</td>
+      <td>0.0470</td>
+    </tr>
+    <tr>
+      <td>High vs. Medium</td>
+      <td>0.0007</td>
     </tr>
   </tbody>
 </table>

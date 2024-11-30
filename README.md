@@ -16,7 +16,7 @@ The main contents of the repository are the following:
   - _Idiosyncratic_vol.xlsx_: Idiosyncratic volatility for each sample (the output of Calculate_id_vol.py)
   - _Results_M6.xlsx_ and _Results_v2.xlsx_: Models' forecasts for M6 and M6+ samples, respectively (the output of Generate_forecasts.py)
   - _Results_M6_with_metrics.xlsx_ and _Results_v2_with_metrics.xlsx_: Models' forecasts together with evaluation metrics for for M6 and M6+ samples, respectively (the output of Calculate_metrics.py)
-- results/ folder: This folder contains the HTML files for all tables and JPG files for all figures in the paper (the outputs of Calculate_tables.py)
+- results/ folder: This folder contains the HTML files for all tables and JPG files for all figures in the paper (the outputs of Generate_tables_and_figures.py)
 - lag_llama/ folder: The code for the Lag-Llama model which has been obtained from https://github.com/time-series-foundation-models/lag-llama.
 
 > [!NOTE]
@@ -82,11 +82,11 @@ python Calculate_metrics.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPL
 To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
 
 ```
-python Calculate_tables.py --REPLICATE_PAPER 1
+python Generate_tables_and_figures.py --REPLICATE_PAPER 1
 ```
 or, more generally,
 ```
-python Calculate_tables.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
+python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
 ```
 
 ***Arguments***

@@ -152,23 +152,14 @@ def RPS_calculation(hist_data, submission, asset_no=100):
         rps_sub.append(np.mean([(a - b)**2 for a, b in zip(target, frc)]))
 
 
-    w = np.sum(submission.iloc[:,1:6] * np.array([-0.1,-0.05,0.01,0.05,0.1]), axis=1)
-    ret = np.sum(w * returns['Return']) / w.sum()
-    b_ret = returns['Return'].sum() / 100
-
     submission["RPS"] = rps_sub
-
-    temp = submission.merge(ranking[['ID','Rank']], on='ID')
-    temp['Rank'] -= 1
-    t = np.array([(np.abs(temp['Rank'] - temp.iloc[:,1:6].values.argmax(axis=1)) == 0).sum(), (np.abs(temp['Rank'] - temp.iloc[:,1:6].values.argmax(axis=1)) == 1).sum(), (np.abs(temp['Rank'] - temp.iloc[:,1:6].values.argmax(axis=1)) == 2).sum(), (np.abs(temp['Rank'] - temp.iloc[:,1:6].values.argmax(axis=1)) == 3).sum(), (np.abs(temp['Rank'] - temp.iloc[:,1:6].values.argmax(axis=1)) == 4).sum()])
 
     output = {'RPS' : np.round(np.mean(rps_sub), 4),
               'details' : submission,
-              'truth' : truth,
-              '01234': t,
-              'ovrprf': ret - b_ret}
+              'truth' : truth}
 
     return(output)
+
 
 def prepare_data(data_universe, data_file):
     # Read asset prices data (as provided by the M6 submission platform)
@@ -542,113 +533,41 @@ class Generate_forecasts:
 
     def eval_models(self):
 
-
-
-
+        self.all_dates = np.concatenate((self.dates_valid, self.dates_backtest), axis=None)
+        
         self.time = pd.DataFrame(
-            index=[d for d in self.dates_backtest],
+            index=[d for d in self.all_dates],
             columns=[config['name'] for config in self.configs],
             dtype=float
         )
 
-        if self.data_from_previous_run and (not pd.read_excel(self.data_from_previous_run, sheet_name='forecasts').empty):
-            all_forecasts = pd.read_excel(self.data_from_previous_run, sheet_name='forecasts')
-            if not all_forecasts.empty:
-                self.all_forecasts.iloc[:,:] = all_forecasts.iloc[2:,2:].values
-
-            self.dates_backtest = self.dates_backtest[self.dates_backtest > self.all_forecasts.last_valid_index()[0]]
-
-        if len(self.all_forecasts) == 0:
-            self.all_forecasts = pd.DataFrame(
-                index=pd.MultiIndex.from_tuples([(d, asset) for d in np.concatenate((self.dates_valid, self.dates_backtest), axis=None) for asset in self.monthly_returns.columns], names=['Date', 'Asset']),
-                columns=pd.MultiIndex.from_tuples([(m, r) for m in [config['name'] for config in self.configs]+['truth'] for r in ["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]], names=['Models', 'Ranks']),
-                dtype=float
-            )
-
-        for d in tqdm(self.dates_backtest):
-            eval_train_df = self.train[self.train['Date'].isin(self.returns_df[self.returns_df.index < d - pd.offsets.BusinessDay(n=1)].index)].reset_index(drop=True)
-            eval_test_df = self.train[self.train['Date'].isin(self.returns_df[self.returns_df.index == d - pd.offsets.BusinessDay(n=1)].index)].reset_index(drop=True)
-            eval_return_df = self.monthly_returns[self.monthly_returns.index < d]
-            eval_return_df = eval_return_df.fillna(eval_return_df.rolling(20).mean()).fillna(0)
-            eval_return_df = eval_return_df.astype(np.float32)
-            eval_monthly_return_df = eval_return_df[eval_return_df.index.isin(pd.date_range(end=eval_return_df.index[-1], freq='4W-FRI', periods=eval_return_df.shape[0] / 20 + 1))]
-            eval_closing_df = self.cleaned_closing_prices[self.cleaned_closing_prices.index < d]
-            eval_closing_df = eval_closing_df.bfill()
-
-
-            # These are the data for the following month. We will use them to forecast
-            date_range = pd.date_range(start=self.returns_df[self.returns_df.index < d].index[-1].date() + pd.offsets.BusinessDay(n=1), end=self.returns_df[self.returns_df.index < d].index[-1].date() + pd.DateOffset(weeks=4), freq='D')
-            d_hist_data = self.closing_prices_df[(self.closing_prices_df.index.isin(date_range))].reset_index().melt(id_vars=['Date'], value_vars=self.closing_prices_df.columns)
-            d_hist_data.rename(columns={'variable':'symbol','Date':'date','value':'price'},inplace=True)
-
-            # Since we have multiple dataframes with training data depending on the model, the training period is caclulated using all dataframes used
-            print('\nTraining period: {}-{}'.format(min(eval_closing_df.index[0], eval_train_df['Date'].unique().min(), eval_monthly_return_df.index[0]),
-                                                                        max(eval_closing_df.index[-1], eval_train_df['Date'].unique().max(), eval_monthly_return_df.index[-1])))
-            print('Evaluation period: {}-{}\n'.format(date_range[0], date_range[-1]))
-
-            for config in self.configs:
-
-                print(f'Evaluating model {config["name"]}')
-
-                if config['type'] == 'features':
-                    train_df = eval_train_df
-                    test_df = eval_test_df
-                elif config['type'] == 'Dreturns':
-                    train_df = eval_return_df
-                    test_df = eval_return_df.iloc[-1:,:]
-                elif config['type'] == 'Mreturns':
-                    train_df = eval_monthly_return_df
-                    test_df = eval_monthly_return_df.iloc[-1:,:]
-
-                start = time.time()
-
-                # Train model
-                if 'optimized_hyperparameters' in config:
-                    config['model'].fit(train_df, hyperparams=config['optimized_hyperparameters'])
-                else:
-                    config['model'].fit(train_df)
-
-                # Forecast next 4-weeks
-                forecast = config['model'].forecast(test_df)
-                t = RPS_calculation(hist_data = d_hist_data, submission = forecast)
-
-
-                # Save elapsed time for each model
-                self.time[config['name']].loc[d] = time.time() - start
-
-
-                self.all_forecasts.loc[d, (config['name'], )] = forecast[["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]].values
-                self.all_forecasts.loc[d, ('truth', )] = t['truth'].values
-
-
-            with pd.ExcelWriter(self.results_file) as writer:
-                self.all_forecasts.to_excel(writer, sheet_name='forecasts')
-
-
-    def get_backtesting_forecasts(self):
-
         self.all_forecasts = pd.DataFrame(
-            index=pd.MultiIndex.from_tuples([(d, asset) for d in np.concatenate((self.dates_valid, self.dates_backtest), axis=None) for asset in self.monthly_returns.columns], names=['Date', 'Asset']),
+            index=pd.MultiIndex.from_tuples([(d, asset) for d in self.all_dates for asset in self.monthly_returns.columns], names=['Date', 'Asset']),
             columns=pd.MultiIndex.from_tuples([(m, r) for m in [config['name'] for config in self.configs]+['truth'] for r in ["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]], names=['Models', 'Ranks']),
             dtype=float
         )
-
+        
         calculate_data = 1
-
         if self.data_from_previous_run and (not pd.read_excel(self.data_from_previous_run, sheet_name='forecasts').empty):
             all_forecasts = pd.read_excel(self.data_from_previous_run, sheet_name='forecasts')
             if not all_forecasts.empty:
                 self.all_forecasts.iloc[:,:] = all_forecasts.iloc[2:,2:].values
 
-            if self.all_forecasts.last_valid_index()[0] >= self.dates_valid[-1]:
+            if len(self.all_forecasts) == 0:
+                self.all_forecasts = pd.DataFrame(
+                    index=pd.MultiIndex.from_tuples([(d, asset) for d in self.all_dates for asset in self.monthly_returns.columns], names=['Date', 'Asset']),
+                    columns=pd.MultiIndex.from_tuples([(m, r) for m in [config['name'] for config in self.configs]+['truth'] for r in ["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]], names=['Models', 'Ranks']),
+                    dtype=float
+                )
+
+            if self.all_forecasts.last_valid_index()[0] >= self.all_dates[-1]:
                 calculate_data = 0
             else:
-                self.dates_valid = self.dates_valid[self.dates_valid > self.all_forecasts.last_valid_index()[0]]
-
+                self.all_dates = self.all_dates[self.all_dates > self.all_forecasts.last_valid_index()[0]]
 
         if calculate_data == 1:
 
-            for d in tqdm(self.dates_valid):
+            for d in tqdm(self.all_dates):
                 eval_train_df = self.train[self.train['Date'].isin(self.returns_df[self.returns_df.index < d - pd.offsets.BusinessDay(n=1)].index)].reset_index(drop=True)
                 eval_test_df = self.train[self.train['Date'].isin(self.returns_df[self.returns_df.index == d - pd.offsets.BusinessDay(n=1)].index)].reset_index(drop=True)
                 eval_return_df = self.monthly_returns[self.monthly_returns.index < d]
@@ -658,12 +577,17 @@ class Generate_forecasts:
                 eval_closing_df = self.cleaned_closing_prices[self.cleaned_closing_prices.index < d]
                 eval_closing_df = eval_closing_df.bfill()
 
+
                 # These are the data for the following month. We will use them to forecast
                 date_range = pd.date_range(start=self.returns_df[self.returns_df.index < d].index[-1].date() + pd.offsets.BusinessDay(n=1), end=self.returns_df[self.returns_df.index < d].index[-1].date() + pd.DateOffset(weeks=4), freq='D')
                 d_hist_data = self.closing_prices_df[(self.closing_prices_df.index.isin(date_range))].reset_index().melt(id_vars=['Date'], value_vars=self.closing_prices_df.columns)
                 d_hist_data.rename(columns={'variable':'symbol','Date':'date','value':'price'},inplace=True)
 
-                truth = pd.DataFrame(data=to_categorical(pd.qcut((self.closing_prices_df[(self.closing_prices_df.index == date_range[-1])].values / self.closing_prices_df[(self.closing_prices_df.index == date_range[0])].values - 1).reshape(-1,), 5, duplicates='drop', labels=False)), columns=["Rank1", "Rank2","Rank3", "Rank4", "Rank5"], index=self.closing_prices_df.columns)
+                # Since we have multiple dataframes with training data depending on the model, the training period is caclulated using all dataframes used
+                print('\nTraining period: {}-{}'.format(min(eval_closing_df.index[0], eval_train_df['Date'].unique().min(), eval_monthly_return_df.index[0]),
+                                                                            max(eval_closing_df.index[-1], eval_train_df['Date'].unique().max(), eval_monthly_return_df.index[-1])))
+                print('Evaluation period: {}-{}\n'.format(date_range[0], date_range[-1]))
+
                 for config in self.configs:
 
                     print(f'Evaluating model {config["name"]}')
@@ -678,6 +602,8 @@ class Generate_forecasts:
                         train_df = eval_monthly_return_df
                         test_df = eval_monthly_return_df.iloc[-1:,:]
 
+                    start = time.time()
+
                     # Train model
                     if 'optimized_hyperparameters' in config:
                         config['model'].fit(train_df, hyperparams=config['optimized_hyperparameters'])
@@ -688,9 +614,15 @@ class Generate_forecasts:
                     forecast = config['model'].forecast(test_df)
                     t = RPS_calculation(hist_data = d_hist_data, submission = forecast)
 
+
+                    # Save elapsed time for each model
+                    self.time[config['name']].loc[d] = time.time() - start
+
+
                     self.all_forecasts.loc[d, (config['name'], )] = forecast[["Rank1", "Rank2","Rank3", "Rank4", "Rank5"]].values
-                    self.all_forecasts.loc[d, ('truth', )] = t['truth'].values
-                    #self.all_forecasts.loc[d, ('truth', )] = truth
+
+                self.all_forecasts.loc[d, ('truth', )] = t['truth'].values
+
 
                 with pd.ExcelWriter(self.results_file) as writer:
                     self.all_forecasts.to_excel(writer, sheet_name='forecasts')
@@ -708,12 +640,11 @@ class Generate_forecasts:
 
 if __name__ == '__main__':
 
-    # To run: python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama EWMA --KEEP_TUNING_FORECASTS 1 --SAMPLE 'M6+' --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
+    # To run: python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama EWMA --SAMPLE 'M6+' --DATA_FROM_PREVIOUS_RUN Results_v2.xlsx
 
     parser = argparse.ArgumentParser(description='Generate forecasts')
     parser.add_argument('--MODEL_NAMES', nargs='+', type=str, help="Add the models you want to run")
     parser.add_argument('--SAMPLE', nargs='?', type=str, help="M6 for M6 sample, M6+ for M6+ sample and other for other")
-    parser.add_argument('--KEEP_TUNING_FORECASTS', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--TUNING', nargs='?', type=int, const=0, default=0)
     parser.add_argument('--DATA_FROM_PREVIOUS_RUN', nargs='?', type=str, const=None, default=None)
     args = parser.parse_args()
@@ -743,7 +674,7 @@ if __name__ == '__main__':
         end_valid_date = '2014-09-19'
         data_file = 'data/Data_other.xlsx'
         data_universe = 'data/Universe_other.xlsx'
-        results_file = 'outputs/Results_otherxlsx'
+        results_file = 'outputs/Results_other.xlsx'
 
     start_oos_date = datetime.datetime.strptime(start_oos_date, '%Y-%m-%d')
     end_oos_date = datetime.datetime.strptime(end_oos_date, '%Y-%m-%d')
@@ -1067,8 +998,6 @@ if __name__ == '__main__':
         config = eval.optimize_hyperparameters(config)
         eval.add_model(config)
 
-    if args.KEEP_TUNING_FORECASTS:
-        eval.get_backtesting_forecasts()
 
     eval.eval_models()
     eval.save_results()
