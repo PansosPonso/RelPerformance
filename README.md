@@ -58,9 +58,9 @@ Run the relevant python scripts (see below).
 
 
 ## Usage to replicate the results of the paper
-**Step 1.** The following code generates Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
+The following two steps generate Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
 
-  To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
+**Step 1.** To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
 
   ```
   python Calculate_metrics.py --REPLICATE_PAPER 1
