@@ -30,12 +30,12 @@ If you haven’t installed Git, download it from https://git-scm.com/ and follow
 
 Clone this repository:
 ```
-git clone https://github.com/username/repository-name.git RelPerformanceAnalytics
+git clone https://github.com/PansosPonso/RelPerformance.git
 ```
 
 Navigate to the project folder:
 ```
-cd RelPerformanceAnalytics
+cd RelPerformance
 ```
 
 Set up a virtual environment and activate it:
