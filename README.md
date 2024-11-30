@@ -101,7 +101,7 @@ Run the relevant python scripts (see below).
   > This code takes <1 min for both M6 and M6+ samples, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 ## Usage to generate new forecasts
-**Step 0.0.** To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
+**Step 0.** To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
 
 ```
 python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --SAMPLE 'M6'
@@ -142,7 +142,7 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 > This code takes ~3 hours for the M6 sample and ~21 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU. When running on CPU, the time is approximately 4 times longer.
 
 ## Idiosyncratic volatility calculation
-**Step 0.1.** To calculate idiosyncratic volatility per asset for the M6 and M6+ samples (or other custom data), use the following command:
+**Step 0'.** To calculate idiosyncratic volatility per asset for the M6 and M6+ samples (or other custom data), use the following command:
 
 ```
 python Calculate_id_vol.py --SAMPLE 'M6' --FILE_NAME 'outputs/Results_M6.xlsx' --DATA_FILE 'data/Data_M6.xlsx'
