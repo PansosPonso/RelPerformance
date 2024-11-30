@@ -79,7 +79,7 @@ python Calculate_metrics.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPL
 > This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 
-To calculate all tables, use the following command **(after running Calculate_metrics.py)**:
+To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
 
 ```
 python Calculate_tables.py --REPLICATE_PAPER 1
