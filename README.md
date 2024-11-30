@@ -101,7 +101,7 @@ Run the relevant python scripts (see below).
   > This code takes <1 min for both M6 and M6+ samples, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 ## Usage to generate new forecasts
-**Step 0.** To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
+**Step 0.** To train the models and generate forecasts, use the following command:
 
 ```
 python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama --SAMPLE 'M6'
