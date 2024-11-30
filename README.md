@@ -23,7 +23,7 @@ The main contents of the repository are the following:
 > You can run all scripts for custom data, assuming they have the same structure as the ones for the M6 or M6+ samples.
 
 > [!WARNING]
-> To run _Generate_forecasts.py_ and _Calculate_id_vol.py_ (see below for more information), make sure Data_M6.xlsx and Data_v2.xlsx (or any other custom Data_other.xlsx) are filled with data from a provider. These files are sample templates provided to illustrate the required structure.
+> To run _Generate_forecasts.py_ and _Calculate_id_vol.py_ (see below for more information), make sure Data_M6.xlsx and Data_v2.xlsx (or any other custom Data_other.xlsx) are filled with data from a provider. These files are sample templates provided to illustrate the required structure. In case of other data, make necessary changes between lines 672-678 in _Generate_forecasts.py_.
 
 ## How to use this repository
 If you haven’t installed Git, download it from https://git-scm.com/ and follow the instructions for your operating system.
