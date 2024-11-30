@@ -58,7 +58,7 @@ Run the relevant python scripts (see below).
 
 
 ## Usage to replicate the results of the paper
-The following code generates the 9 tables and 2 figures for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
+The following code generates Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
 
 To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
 
@@ -109,7 +109,6 @@ python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KD
 ***Arguments***
 
 - **SAMPLE**: 'M6' for M6 sample, 'M6+' for M6+ sample and 'other' for other custom data.
-- **KEEP_TUNING_FORECASTS**: Specifies whether to keep the forecasts that were generated for the tuning sample (it is used for calibrating forecasts).
 - **MODEL_NAMES**: Specifies the models to be evaluated. Available choices are listed below.
 - **DATA_FROM_PREVIOUS_RUN**: In case the code was interrupted, this parameter allows specifying an Excel file containing the forecasts generated up to the point of interruption.
 - **TUNING**: Indicates whether the models' hyperparameters should be tuned.
