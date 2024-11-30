@@ -78,6 +78,7 @@ Run the relevant python scripts (see below).
   > [!NOTE]
   > This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
+---
 
 2. To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
 
