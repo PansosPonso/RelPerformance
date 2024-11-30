@@ -104,7 +104,7 @@ Run the relevant python scripts (see below).
 **Step 0.** To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
 
 ```
-python Generate_forecasts.py --MODEL_NAMES MND MLP LGBM RF SR DeepAR PatchTST KDE GM GC NF VAE NB LagLlama SVM GAN BVAR --SAMPLE 'M6'
+python Generate_forecasts.py --MODEL_NAMES LGBM MLP GC MND PatchTST DeepAR GM KDE NB SVM SR RF BVAR VAE NF GAN LagLlama --SAMPLE 'M6'
 ```
 
 ***Arguments***
