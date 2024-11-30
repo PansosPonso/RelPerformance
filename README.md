@@ -60,44 +60,44 @@ Run the relevant python scripts (see below).
 ## Usage to replicate the results of the paper
 1. The following code generates Tables 2-10 and Figures 1-2 for the paper "Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches.". 
 
-To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
+  To calculate all evaluation metrics for both M6 and M6+ samples (or other custom data), use the following command:
 
-```
-python Calculate_metrics.py --REPLICATE_PAPER 1
-```
-or, more generally,
-```
-python Calculate_metrics.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12
-```
-***Arguments***
+  ```
+  python Calculate_metrics.py --REPLICATE_PAPER 1
+  ```
+  or, more generally,
+  ```
+  python Calculate_metrics.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12
+  ```
+  ***Arguments***
 
-- **REPLICATE_PAPER**: If set to 1, calculates all evaluation metrics for both M6 and M6+ samples.
-- **TUNING_SAMPLE**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
-- **FILE_NAME**: Specifies the file that contains the forecasts.
+  - **REPLICATE_PAPER**: If set to 1, calculates all evaluation metrics for both M6 and M6+ samples.
+  - **TUNING_SAMPLE**: The number of observations in the tuning sample (12 for the M6 sample and 36 for the M6+ sample).
+  - **FILE_NAME**: Specifies the file that contains the forecasts.
 
-> [!NOTE]
-> This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
+  > [!NOTE]
+  > This code takes ~1 hour for the M6 sample and ~6 hours for the M6+ sample, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 
 2. To generate Tables 2-10 and Figures 1-2, use the following command **(after running Calculate_metrics.py)**:
 
-```
-python Generate_tables_and_figures.py --REPLICATE_PAPER 1
-```
-or, more generally,
-```
-python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
-```
+  ```
+  python Generate_tables_and_figures.py --REPLICATE_PAPER 1
+  ```
+  or, more generally,
+  ```
+  python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
+  ```
 
-***Arguments***
+  ***Arguments***
 
-- **REPLICATE_PAPER**: If set to 1, calculates Tables and Figures of the paper.
-- **TUNING_SAMPLE**: The number of observations in the tuning sample.
-- **FREQ**: The frequency (in months) that the ensemble models are reevaluated.
-- **FILE_NAME**: Specifies the file that contains the forecasts and the metrics.
+  - **REPLICATE_PAPER**: If set to 1, calculates Tables and Figures of the paper.
+  - **TUNING_SAMPLE**: The number of observations in the tuning sample.
+  - **FREQ**: The frequency (in months) that the ensemble models are reevaluated.
+  - **FILE_NAME**: Specifies the file that contains the forecasts and the metrics.
 
-> [!NOTE]
-> This code takes <1 min for both M6 and M6+ samples, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
+  > [!NOTE]
+  > This code takes <1 min for both M6 and M6+ samples, using a laptop with an AMD Ryzen 5 5600H CPU and Nvidia GeForce RTX 3050 GPU.
 
 ## Usage to generate new forecasts
 To run the models and generate the forecasts for the M6 sample (or other custom data), use the following command:
