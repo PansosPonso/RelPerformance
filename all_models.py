@@ -1100,56 +1100,6 @@ class mlp_model(Base_Model):
         return results
 
 #################################### MVN ####################################
-class naive_model(Base_Model):
-    def __init__(self, params=None, tickers=None):
-        super().__init__()
-        self.model = None
-        self.params = params
-        self.tickers = tickers
-
-    def fit(self, train_df, hyperparams=None):
-
-        if hyperparams is not None:
-            self.params = hyperparams
-
-        self.last_month = train_df.iloc[-1,:].values.reshape(-1,)
-
-    def forecast(self, test_df):
-
-        def softmax_with_temperature(scores, temperature=1.0):
-            # Apply temperature to scores (higher temp -> more uniform, lower temp -> peakier)
-            exp_scores = np.exp(scores / (temperature + 1.e-5))
-            return exp_scores / exp_scores.sum()
-
-        def create_distribution_matrix(values, center_values, temperature=1.0):
-            # Initialize matrix to store probabilities for each center value
-            probability_matrix = np.zeros((len(center_values), len(values)))
-
-            # Loop through each center value and compute the corresponding probabilities
-            for i, center_value in enumerate(center_values):
-                # Compute symmetric scores (negative distances from center)
-                distances = np.abs(values - center_value)
-                scores = -distances
-
-                # Apply softmax with temperature
-                probabilities = softmax_with_temperature(scores, temperature)
-
-                # Store the probabilities for this center value in the matrix
-                probability_matrix[i, :] = probabilities
-
-            return probability_matrix
-
-        last_month_quintiles = pd.qcut(self.last_month, 5, duplicates='drop', labels=False)
-        probability_matrix = create_distribution_matrix(np.array([0, 1, 2, 3, 4]), last_month_quintiles, self.params['out_smooth'])
-
-        results = pd.DataFrame(columns = ["ID", "Rank1", "Rank2", "Rank3", "Rank4","Rank5"])
-        results.ID = self.tickers
-        results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]] = probability_matrix
-        results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]] += 0.2 - results[["Rank1", "Rank2", "Rank3", "Rank4","Rank5"]].mean()
-
-        return results
-
-#################################### MVN ####################################
 class mnd_model(Base_Model):
     def __init__(self, params=None):
         super().__init__()
