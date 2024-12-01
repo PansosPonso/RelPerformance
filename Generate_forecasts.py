@@ -35,7 +35,7 @@ from hyperopt.fmin import fmin
 
 from all_models import copula_model, kde_model, gaussian_mixture_model, deepar_model
 from all_models import patchtst_model, flows_model, vae_model, llama_model
-from all_models import mnd_model, garch_mnd_model, gan_model, bvar_model, naive_model, ewma_model
+from all_models import mnd_model, gan_model, bvar_model, ewma_model
 from all_models import rforest_model, logistic_model, svm_model, naive_bayes_model, mlp_model, lgbm_model
 
 RANDOM_SEED = 42
@@ -842,21 +842,6 @@ if __name__ == '__main__':
             'optimize_params':args.TUNING
         }
         ,
-        'MND+GARCH' : {
-            'name': 'MND+GARCH',
-            'model': garch_mnd_model(params={
-                                          'lr':1e-2,
-                                          'epochs':50
-                                          }
-                                    ),
-            'hyperparameter_space': {
-                                    'epochs': scope.int(hp.quniform('epochs', 10, 100, 10)),
-                                    'lr': hp.loguniform('lr', np.log(1e-3), np.log(1e-1)),
-                                    },
-            'type': 'Mreturns',
-            'optimize_params':args.TUNING
-        }
-        ,
         'VAE' : {
             'name': 'VAE',
             'model': vae_model(params={'epochs':800,'batch_size':500,'compress_dims':(128,128),'decompress_dims':(128,128)}),
@@ -940,18 +925,6 @@ if __name__ == '__main__':
             'name': 'MND',
             'model': mnd_model(),
             'type': 'Mreturns'
-        }
-        ,
-        'NAIVE' : {
-            'name': 'Naive',
-            'model': naive_model(tickers=tickers, params={
-                                            'out_smooth':8,
-                                            }),
-            'hyperparameter_space': {
-                                    'out_smooth': scope.int(hp.quniform('out_smooth', 2, 8, 1)),
-                                    },
-            'type': 'Mreturns',
-            'optimize_params':args.TUNING
         }
         ,
         'GC' : {
