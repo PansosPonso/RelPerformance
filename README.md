@@ -87,7 +87,7 @@ The following two steps generate Tables 2-10 and Figures 1-2 for the paper "Pred
   ```
   or, more generally,
   ```
-  python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6.xlsx' --TUNING_SAMPLE 12 --FREQ 6
+  python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6_with_metrics.xlsx' --TUNING_SAMPLE 12 --FREQ 6
   ```
 
   ***Arguments***
