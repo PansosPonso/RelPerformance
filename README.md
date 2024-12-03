@@ -87,7 +87,7 @@ The following two steps generate Tables 2-10 and Figures 1-2 for the paper "Pred
   ```
   or, more generally,
   ```
-  python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6_with_metrics.xlsx' --TUNING_SAMPLE 12 --FREQ 6
+  python Generate_tables_and_figures.py --FILE_NAME 'outputs/Results_M6_with_metrics.xlsx' --TUNING_SAMPLE 12 --FREQ 6 --SAMPLE 'M6'
   ```
 
   ***Arguments***
@@ -95,6 +95,7 @@ The following two steps generate Tables 2-10 and Figures 1-2 for the paper "Pred
   - **REPLICATE_PAPER**: If set to 1, calculates Tables and Figures of the paper.
   - **TUNING_SAMPLE**: The number of observations in the tuning sample.
   - **FREQ**: The frequency (in months) that the ensemble models are reevaluated.
+  - **SAMPLE**: 'M6' for M6 sample, 'M6+' for M6+ sample and 'other' for other custom data.
   - **FILE_NAME**: Specifies the file that contains the forecasts and the metrics.
 
   > [!NOTE]
