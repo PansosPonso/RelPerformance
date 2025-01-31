@@ -2,7 +2,7 @@
 Author: Panagiotis Samartzis
 
 ## Introduction
-This repository contains the code for the paper titled [Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches]([https://pages.github.com/](https://www.sciencedirect.com/science/article/abs/pii/S0169207024001365?dgcid=author)). The project features a range of models designed to generate probabilistic forecasts within the framework of the M6 competition (https://www.unic.ac.cy/iff/research/forecasting/m-competitions/m6/) and includes a comprehensive evaluation framework to assess their performance.
+This repository contains the code for the paper titled [Predicting the Relative Performance among Financial Assets: A Comparative Analysis of Different Approaches](https://www.sciencedirect.com/science/article/abs/pii/S0169207024001365?dgcid=author). The project features a range of models designed to generate probabilistic forecasts within the framework of the M6 competition (https://www.unic.ac.cy/iff/research/forecasting/m-competitions/m6/) and includes a comprehensive evaluation framework to assess their performance.
 
 ## Contents
 The main contents of the repository are the following:
